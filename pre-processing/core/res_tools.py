@@ -28,8 +28,8 @@ def vertical_extrapolation(u,dep,lev=[],z0=[]):
 				
 
 		else:
-			zu[:,1]=u
-			zu[:,0]=u # not too sure for this one maybe should be 0
+			zu[:,1]=u[:,0]
+			zu[:,0]=u[:,0] # not too sure for this one maybe should be 0
 	else: # 3D datasets
 		
 		for n in range(0,dep.shape[0]):

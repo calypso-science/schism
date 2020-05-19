@@ -121,7 +121,7 @@ def process(POS,fileout,dirin,Istart,Iend,params,depth,prefix):
 		if not os.path.isfile(fileIN):
 			continue
 
-		print ' read file: '+str(nfile)
+		print( ' read file: '+str(nfile))
 		for i,node in enumerate(nodes):
 			ncs=netCDF4.Dataset(fileIN)
 			Total= numpy.zeros(shape=(nt,7))
@@ -134,7 +134,7 @@ def process(POS,fileout,dirin,Istart,Iend,params,depth,prefix):
 			Total[:,5]=[dt.second for dt in dtime.astype(object)]
 			Total[:,6]=ncs.variables['depth'][node]
 			if nfile==Istart:
-				f = file(fout[i], "w")
+				f = open(fout[i], "w")
 				f.write('Year\tMonth\tDay\tHour\tMin\tSec\tDepth\t')
 
 
@@ -192,7 +192,7 @@ def process(POS,fileout,dirin,Istart,Iend,params,depth,prefix):
 					zdata=numpy.squeeze(zdata[:,0,:])
 					zdata = numpy.ma.masked_where(zdata==-9999,zdata)
 					if depth is None:
-						print "enter a depth"
+						print("enter a depth")
 						sys.exit(-1)
 
 					for k in range(0,len(depth)):
@@ -215,7 +215,7 @@ def process(POS,fileout,dirin,Istart,Iend,params,depth,prefix):
 				f.write('\n')
 			numpy.savetxt(f,Total,fmt='%g',delimiter='\t')
 		ncs.close()
- 	f.close()
+	f.close()
 
 
      
@@ -239,10 +239,10 @@ if __name__ == "__main__":
 	
 
 	### PRINT IT ALL
-	print 'output name : %s' % (args.fileout)
-	print 'Direcory : %s' % (args.dirout)
-	print 'From file #%i and #%i' % (args.INDstart,args.INDend)
-	print 'Do parameters : %s' % (args.params)
+	print( 'output name : %s' % (args.fileout))
+	print( 'Direcory : %s' % (args.dirout))
+	print( 'From file #%i and #%i' % (args.INDstart,args.INDend))
+	print( 'Do parameters : %s' % (args.params))
 
 	
 	

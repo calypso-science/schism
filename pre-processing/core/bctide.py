@@ -2,11 +2,50 @@ from matplotlib.dates import date2num
 import numpy as np
 from ttide.t_getconsts import t_getconsts
 from ttide.t_vuf import t_vuf
-
+import copy
+from tidal_tools import extract_HC
+from ttide.t_getconsts import t_getconsts
 
 TRACERS_MODULE=['GEN','AGE','SED3D','EcoSim','ICM','CoSiNE','FIB','TIMOR']
 
-def Calculate(lat, t0, cons):
+def t_equilib(freq,doodsonamp,doodsonspecies,lat0):
+  g=9.81;            # m/s^2;
+  erad=6365;         # km
+  earthmoond=3.84e5; # km
+  Mmoon=7.38e22;     # kg
+  Mearth=5.977e24;   # kg
+  Gravconst=6.658e-11;  # m^3/kg/s^2
+
+  # There appears to be a typo in Godin's text, and this
+  # should likely be checked against Doodson's original.
+  # This is what I *think* it should be.
+  G=3/4*Mmoon*(erad*1e3)**3/(earthmoond*1e3)**2/Mearth;
+
+  # The 4/3 is to correct for the 3/4 in G
+  gfac=Gravconst*Mearth/(erad*1e3)**2*(4/3);
+    
+  slat=np.sin(lat0*np.pi/180);
+  clat=np.cos(lat0*np.pi/180);
+
+  G1=np.zeros((6,1));
+
+  # Latitude dependence of amplitude for various species -
+  # + for A, -for B (from Godin, 1972).
+
+  G1[3+0-1,0]=    0.5*G*(1-3*slat**2);
+  G1[3-1-1,0]=      2*G*slat*clat;
+  G1[3+1-1,0]= .72618*G*clat*(1-5*slat**2);
+  G1[3-2-1,0]=2.59808*G*slat*clat**2;
+  G1[3+2-1,0]=        G*clat**2;
+  G1[3+3-1,0]=        G*clat**3;
+
+  idx=[int(idx) for idx in doodsonspecies+3-1]
+  amp=np.abs(doodsonamp/gfac*G1[np.ix_(idx)].T)
+
+  return amp[0]
+   
+
+def Calculate(lat, t0, cons,typ=0):
 
     const = t_getconsts(np.array([]))
     Const= [con.decode('UTF-8') for con in const[0]['name']] 
@@ -19,12 +58,24 @@ def Calculate(lat, t0, cons):
     tear = 360.*(v+u)
     tfreq = (2*np.pi)*const[0]['freq'][consindex]/3600.
     talpha = const[0]['name'][consindex]
-    return talpha, tfreq, tear, f
+
+    if typ==1:
+
+      tpspec=np.abs(const[0]['doodsonspecies'][consindex])
+      tpamp=t_equilib(const[0]['freq'][consindex],const[0]['doodsonamp'][consindex],const[0]['doodsonspecies'][consindex],lat)
+      return talpha,tpspec,tpamp, tfreq, tear, f
+
+    else:
+      return talpha, tfreq, tear, f
 
 def develop_bnd(obc):
     # check if we have a loop in the dictionnary
     if 'cons' in obc:
         obc.pop('cons')
+    if 'tip_dp' in obc:
+        obc.pop('tip_dp')
+    if 'tp cons' in obc:
+        obc.pop('tp cons')
 
     btype=dict()
     
@@ -45,7 +96,7 @@ class BCinputs(object):
     Class that manages input file generation for a model simulation.
     """
 
-    def __init__(self,obc,nnode,lat0,t0, logger=None):
+    def __init__(self,obc,hgrid,lat0,t0, logger=None):
         '''Docstring'''  
 
         if logger:
@@ -55,7 +106,11 @@ class BCinputs(object):
         self.t0= t0
         self.t0dec=date2num(t0)
         self.obc=obc
-        self.nnode=nnode
+        self.hgrid=hgrid
+        self.nnode=hgrid.nnode
+
+
+
 
 
 
@@ -69,8 +124,15 @@ class BCinputs(object):
                 self.bctides.write("%.2f\n" % (ethconst)) 
 
             elif iettype==3 or iettype==5: #forced in frequency domain
-                print('This option is not implemented yet')
-                pass
+                for cons in self.iecons.keys():
+                  self.bctides.write("%s\n" % (cons))
+                  keys=self.iecons[cons].items()
+                  eamp=[ k for k,v in keys if 'amp' in k][0]
+                  epha=[ k for k,v in keys if 'pha' in k][0]
+
+                  for n in range(0,len(self.iecons[cons][eamp])):
+                    self.bctides.write("%.4f %.4f\n" % (self.iecons[cons][eamp][n],self.iecons[cons][epha][n]))
+
 
     def _write_ifltype(self,btypes,ifltype):
 
@@ -78,8 +140,19 @@ class BCinputs(object):
         if ifltype==2: #forced in frequency domain
             const=btypes['ifltype']['const']
             self.bctides.write("%.4f\n" % (const))
-        elif ifltype==3 or ifltype==5: #this boundary is forced by a constant elevation
-            print("not implemented yet")
+        elif ifltype==3 or ifltype==5: #this boundary is forced by a constant elevatio
+            for cons in self.ifcons.keys():
+              self.bctides.write("%s\n" % (cons))
+              keys=self.ifcons[cons].items()
+              uamp=[ k for k,v in keys if 'amp' in k and 'u' in k][0]
+              upha=[ k for k,v in keys if 'pha' in k and 'u' in k][0]
+              vamp=[ k for k,v in keys if 'amp' in k and 'v' in k][0]
+              vpha=[ k for k,v in keys if 'pha' in k and 'v' in k][0]
+              for n in range(0,len(self.ifcons[cons][uamp])):
+                self.bctides.write("%.4f %.4f %.4f %.4f\n" % (self.ifcons[cons][uamp][n],\
+                                                              self.ifcons[cons][upha][n],\
+                                                              self.ifcons[cons][vamp][n],\
+                                                              self.ifcons[cons][vpha][n]))
         elif ifltype==-4: #time history of velocity 
             inflow = btypes['ifltype']['inflow']
             outflow = btypes['ifltype']['outflow']
@@ -101,7 +174,7 @@ class BCinputs(object):
             self.bctides.write("%.2f\n" % (const))
             self.bctides.write("%.2f\n" % (tobc))
 
-    def _write_bctides(self,filename, talpha=[], tfreq=[], tear=[], tnf=[]):
+    def _write_bctides(self,filename,tpalpha=[],tpspec=[],tpamp=[],tpfreq=[],tpear=[],tpnf=[], talpha=[], tfreq=[], tear=[], tnf=[]):
         '''
            ----------------------------------- Elevation b.c. section ------
             iettype(j): (DEFAULT: 5)
@@ -210,12 +283,22 @@ class BCinputs(object):
         # 48-character start time info string (only used for visualization with xmvis6)
         self.bctides.write(self.t0.strftime('%d/%m/%Y %H:%M:%S\n'))
         # ntip tip_dp > # of constituents used in earth tidal potential; cut-off depth for applying tidal potential (i.e., it is not calculated when depth < tip_dp).
-        self.bctides.write("0 1000\n")
+        if len(tpalpha)>0:
+          self.bctides.write("%i %.f\n"%(len(tpalpha),self.obc.get('tip_dp',1000)))
+          for k in range(0, len(tpalpha)):
+              # tidal constituent name
+            self.bctides.write("%s\n"%(str(tpalpha[k].decode('UTF-8')))) 
+              # angular frequency (rad/s), nodal factor, earth equilibrium argument (deg)
+            self.bctides.write("%i %.6f %.6f %.6f %.6f\n" % (tpspec[k],tpamp[k],tpfreq[k], tpnf[k], np.mod(tpear[k],360)))
+        else:
+          self.bctides.write("%i %.f\n"%(len(tpalpha),self.obc.get('tip_dp',1000)))
+
+
         # nbfr > # of tidal boundary forcing frequencies
         self.bctides.write("%d\n"%len(talpha))
         for k in range(0, len(talpha)):
             # tidal constituent name
-        	self.bctides.write("%s\n"%(talpha[k])) 
+        	self.bctides.write("%s\n"%(str(talpha[k].decode('UTF-8')))) 
             # angular frequency (rad/s), nodal factor, earth equilibrium argument (deg)
         	self.bctides.write("%.6f %.6f %.6f\n" % (tfreq[k], tnf[k], np.mod(tear[k],360)))
 
@@ -275,5 +358,68 @@ class BCinputs(object):
 
 
         talpha, tfreq, tear, tnf = Calculate(self.lat0, self.t0dec, self.obc['cons'].split(' '))
-        self._write_bctides(filename,talpha, tfreq, tear, tnf)
+        if 'tp cons' in self.obc:
+          tpalpha,tpspec,tpamp, tpfreq, tpear, tpnf = Calculate(self.lat0, self.t0dec, self.obc['tp cons'].split(' '),1)
 
+        
+
+        btypes=develop_bnd(copy.deepcopy(self.obc))
+        iet=[btypes[k]['iettype']['value'] for k in btypes.keys()]
+        ifl=[btypes[k]['ifltype']['value'] for k in btypes.keys()]
+        if (3 in iet) or (5 in iet):
+          self.get_e_cons(btypes)
+          
+
+        if (3 in ifl) or (5 in ifl):
+          self.get_uv_cons(btypes)
+
+        self._write_bctides(filename,tpalpha,tpspec,tpamp,tpfreq,tpear,tpnf,talpha, tfreq, tear, tnf)
+
+    def get_e_cons(self,btypes):
+          Lat=[]
+          Lon=[]  
+          for b in range(0,len(btypes)):
+            if (btypes[b]['iettype']['value']==3) or (btypes[b]['iettype']['value']==5):
+              file=btypes[b]['iettype']['filename']
+              var=btypes[b]['iettype']['vars']
+           
+              for node_i in self.nnode[b]:
+                Lat.append(self.hgrid.latitude[int(node_i)])
+                Lon.append(self.hgrid.longitude[int(node_i)])
+          
+              
+          HC,tfreq,constidx=extract_HC(file,var,Lon,Lat, logger=self.logger)
+          const = t_getconsts(np.array([]))
+          self.iecons={}
+          
+          for i,n in enumerate(constidx):
+            self.iecons[const[0]['name'][n].decode('UTF-8')]={}
+            for k in HC.keys():
+              k=k.split('_')[0]
+              self.iecons[const[0]['name'][n].decode('UTF-8')][k+'_amp']=HC[k][i,0,:]
+              self.iecons[const[0]['name'][n].decode('UTF-8')][k+'_pha']=np.mod(HC[k][i,2,:],360)
+
+
+    def get_uv_cons(self,btypes):
+          Lat=[]
+          Lon=[]  
+          for b in range(0,len(btypes)):
+            if (btypes[b]['ifltype']['value']==3) or (btypes[b]['ifltype']['value']==5):
+              file=btypes[b]['ifltype']['filename']
+              var=btypes[b]['ifltype']['vars']
+           
+              for node_i in self.nnode[b]:
+                Lat.append(self.hgrid.latitude[int(node_i)])
+                Lon.append(self.hgrid.longitude[int(node_i)])
+          
+              
+          HC,tfreq,constidx=extract_HC(file,var,Lon,Lat, logger=self.logger)
+          const = t_getconsts(np.array([]))
+          self.ifcons={}
+          
+          for i,n in enumerate(constidx):
+            self.ifcons[const[0]['name'][n].decode('UTF-8')]={}
+            for k in var:
+              k=k.split('_')[0]
+              self.ifcons[const[0]['name'][n].decode('UTF-8')][k+'_amp']=HC[k][i,0,:]
+              self.ifcons[const[0]['name'][n].decode('UTF-8')][k+'_pha']=np.mod(HC[k][i,2,:],360)

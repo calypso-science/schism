@@ -13,7 +13,7 @@ from matplotlib.dates import datestr2num,date2num,num2date
 from datetime import timedelta
 from pyproj import Proj, transform
 
-import interpz
+#import interpz
 
 outputEPSG=4326
 
@@ -26,7 +26,8 @@ def Calculate(mean_lat,Tstart,Cons):
     const=t_getconsts(np.array([]))
     itemindex=[]
     for k in range(0,len(Cons)):
-        itemindex .append(np.where(const[0]['name']==Cons[k].ljust(4))[0][0])
+        itemindex .append(np.where(const[0]['name'].astype(str)==Cons[k].ljust(4))[0][0])
+
 
     # Earth equilibrium at the beginning of the run
     [v,u,f]=t_vuf('nodal',Tstart,itemindex, mean_lat);
@@ -36,8 +37,8 @@ def Calculate(mean_lat,Tstart,Cons):
     [v,u,f]=t_vuf('nodal',Tstart,itemindex, mean_lat);
     tnf=f;
 
-    tfreq=2.*np.pi*const[0]['freq'][itemindex]/3600.;
-    talpha=const[0]['name'][itemindex];
+    tfreq=2.*np.pi*const[0]['freq'][itemindex]/3600.
+    talpha=const[0]['name'][itemindex].astype(str)
     return talpha,tfreq,tear,tnf
 
 
@@ -141,7 +142,10 @@ def create_filetide_var(filetide,t0,vari,cons,X,Y,depth,nv,do_variance,lev):
     vX[:]=X
     vY[:]=Y
     vD[:]=depth
-    vN[:]=nv
+
+    nv[nv==9.969209968386869e+36]=FillValue
+
+    vN[:]=nv.data
 
 
     if lev is not None:
@@ -295,7 +299,7 @@ def LSQSOLEG(mnharf,nf,mm,ha,gloelv,haff,haface):
     for n in range(0,nnodes):
         hax=fulsol(1,mnharf,mm,ha,gloelv[:,n])
         if n % 10000 == 0:
-                print '      nodes %i of %i' % (n,nnodes)
+                print ('      nodes %i of %i' % (n,nnodes))
 #        Compute amplitude and phase for each frequency making sure that the
 #!        phase is between 0 and 360 deg.  Then write output.
 
@@ -304,7 +308,7 @@ def LSQSOLEG(mnharf,nf,mm,ha,gloelv,haff,haface):
             emag[0,n]=hax[0]/haff[0]
             phasee[0,n]=0
 
-        for i in range(2,hax.shape[0]/2+1):
+        for i in range(2,int(hax.shape[0]/2+1)):
                 i1=(2*i-1-nf)-1
                 i2=(i1+1)
                 emag[i-1,n]=np.sqrt(hax[i1]*hax[i1]+hax[i2]*hax[i2])/haff[i-1]
@@ -332,7 +336,7 @@ def get_variance(elav,elva,hafreq,emag,phasee,ntsteps,dt):
 
     for it in range(0,ntsteps):
         if it % 1000 == 0:
-            print '      timesteps %i of %i' % (it,ntsteps)
+            print ('      timesteps %i of %i' % (it,ntsteps))
         time=TIMEBEG+dt*it
         rse=np.zeros((emag.shape[1]))
         for nf in range(0,hafreq.shape[0]):
@@ -358,7 +362,7 @@ def get_variance(elav,elva,hafreq,emag,phasee,ntsteps,dt):
     return eavdif,evadif
 
 def read_initial_netcdf_file(file0,EPSG,is_3d):
-    print 'READING INITIAL FILE: %s' % file0
+    print('READING INITIAL FILE: %s' % file0)
 
     nc=netCDF4.Dataset(file0)
 
@@ -414,8 +418,7 @@ def check_rayleigh(ndays,ray):
                                np.array([]), np.array([]),\
                                np.array([]))
     nameu, fu, ju, namei, fi, jinf, jref = tmptuple
-
-    return [x.replace(' ','') for x in nameu]
+    return [x.decode().replace(' ','') for x in nameu]
 
 def process(fileout,dirout,INDstart,INDend,vari,Cons,EPSG,do_variance,lev,ray,ndays):
 
@@ -449,7 +452,7 @@ def process(fileout,dirout,INDstart,INDend,vari,Cons,EPSG,do_variance,lev,ray,nd
     
     ncout,all_amp,all_pha,all_mean,all_exp = create_filetide_var(fileout,t0.toordinal(), vari,talpha,X,Y,depth,nv,do_variance,lev)
 
-    print 'LOADING DATA'
+    print('LOADING DATA')
 
     time_in_sec=0
 
@@ -457,7 +460,7 @@ def process(fileout,dirout,INDstart,INDend,vari,Cons,EPSG,do_variance,lev,ray,nd
         file1=os.path.join(dirout,PREFIX+str(ifile)+SUFIX+'.nc')
         nc=netCDF4.Dataset(file1)
         nt=len(nc.variables['time'])
-        print '   READING FILE: %s' % file1
+        print( '   READING FILE: %s' % file1)
 
         for n in range(0,nt):
 
@@ -516,14 +519,14 @@ def process(fileout,dirout,INDstart,INDend,vari,Cons,EPSG,do_variance,lev,ray,nd
     #......Solve the harmonic analysis problem and write the output
     #
     for nv in vari:
-        print 'SOLVING %s' % nv
+        print ('SOLVING %s' % nv)
         if nv is 'u' or nv is 'v':
             for ilev in range(0,len(lev)):
                 emag,phasee=LSQSOLEG(mnharf,nf,mm,hax,globvar[nv][:,:,ilev],tnf,tear)
                 all_amp[nv][:,ilev,:]=emag
                 all_pha[nv][:,ilev,:]=phasee           
                 if do_variance is True:
-                    print 'resynthesized time series for %s' % nv
+                    print( 'resynthesized time series for %s' % nv)
                     e_mean,e_exp=get_variance(globAV[nv][:,ilev],globVA[nv][:,ilev],tfreq,emag,phasee,icall,dt)
                     all_exp[nv][ilev,:]=e_exp
                     all_mean[nv][ilev,:]=e_mean
@@ -534,7 +537,7 @@ def process(fileout,dirout,INDstart,INDend,vari,Cons,EPSG,do_variance,lev,ray,nd
             all_pha[nv][:]=phasee
             
             if do_variance is True:
-                print 'resynthesized time series for %s' % nv
+                print( 'resynthesized time series for %s' % nv)
                 e_mean,e_exp=get_variance(globAV[nv],globVA[nv],tfreq,emag,phasee,icall,dt)
                 all_exp[nv][:]=e_exp
                 all_mean[nv][:]=e_mean
@@ -576,7 +579,11 @@ if __name__ == "__main__":
     if args.VAR is None:
         args.VAR=True
     if args.CONS is None:
-        args.CONS=['Z0','M2','S2','N2','SK3','K1','M3','MSF','MS4','M4','L2','O1']
+#        args.CONS=['Z0','M2','S2','N2','SK3','K1','M3','MSF','MS4','M4','L2','O1']
+        args.CONS=['Z0','M2','N2','S2','K1','K2','MS4','M4','MN4','P1','O1','L2','M6','MKS2','MU2',\
+        'MSN2','NU2','2MN6','LDA2','MK4','EPS2','2MS6','MSF','ETA2','TAU1','Q1','SO1','OQ2','MM','NO1',\
+        'CHI1','BET1','ALP1','RHO1','MSM','J1','2N2','M3','SK3']
+
 
 
     if args.CONS[0]!='Z0':

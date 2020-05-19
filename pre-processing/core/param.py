@@ -4,10 +4,11 @@ from mako.runtime import Context
 from io import StringIO
 from mako import exceptions
 import ast
+from matplotlib.dates import date2num
 
 class ModelConfig(object):
     
-    def __init__(self, hydro,t0,
+    def __init__(self, hydro,t0,t1,
         wwm=None,
         sed=None,
         eco=None,
@@ -42,7 +43,7 @@ class ModelConfig(object):
             # order matters since some params are overwritten
             self.config[module]=self._get_default_params(module)
             self._replace_default_params(module)
-            self._set_params_relations(module)
+            self._set_params_relations(module,date2num(t0),date2num(t1))
 
 
         self.config['hydro']['start_year']=t0.year
@@ -162,7 +163,7 @@ class ModelConfig(object):
             default['bott']=0 #bottom stress
             default['wind']=0 #wind velocity vector [m/s] {wind_speed}
             default['wist']=0 #wind stress vector [m^2/s/s] {wind_stress}
-            default['dav']=0 #depth-averaged vel vector [m/s] {dahv}
+            default['dahv']=0 #depth-averaged vel vector [m/s] {dahv}
             default['vert']=0 #vertical velocity [m/s] {vertical_velocity}
             default['temp']=0 #water temperature [C] {temp}
             default['salt']=0 #water salinity [PSU] {salt}
@@ -285,11 +286,11 @@ class ModelConfig(object):
                 config_dict[cfg]['container'].__dict__ = config_dict[cfg]['defaults']
             exec("self.nest.%s = config_dict[cfg]['container']"%cfg) 
         
-    def _set_params_relations(self,module):
+    def _set_params_relations(self,module,t0,t1):
         ''' Docstring'''
 
         self._add_more_tracers()
-        self._update_timings()
+        self._update_timings(t0,t1)
         self._choose_diffusion()
 
     def _choose_diffusion(self):
@@ -317,11 +318,12 @@ class ModelConfig(object):
             import sys;sys.exit(-1)
 
 
-    def _update_timings(self):
+    def _update_timings(self,t0,t1):
         dt=self.config['hydro']['dt']
 
+        self.config['hydro']['rnday']=t1-t0
+
         self.config['hydro']['nhot_write']=(self.userconfig['hydro']['hotstart dt']*3600)/dt
-        self.config['hydro']['nspool_sta'] = (self.userconfig['hydro']['station dt']*3600)/dt
         self.config['hydro']['nspool_sta'] = (self.userconfig['hydro']['station dt']*3600)/dt
         self.config['hydro']['nspool'] = (self.userconfig['hydro']['output dt']*3600)/dt
         self.config['hydro']['ihfskip'] = (self.userconfig['hydro']['file length']*3600)/dt

@@ -27,13 +27,14 @@ logging.basicConfig(filename=None,
                     datefmt='[%Y-%m-%d %H:%M:%S]',
                     level=10)
 
+
 class SCHISM():
     ''' 
     This is the wrapper for preparing and setting up SCHISM.
     '''
 
     def __init__(self, rootdir, hydro_config,vgrid_config,obc,param_tmp,exec_bin,
-                 hgrid_file,timing,input_files,forcings,ic=None,meteo=None,stations=None,
+                 hgrid_file,timing,input_files,forcings=None,ic=None,meteo=None,stations=None,
                  indir=None,
                  logdir=None,
                  errors=None,
@@ -123,13 +124,13 @@ class SCHISM():
 
         self.logger.info('----------------------------------------------------------')
         #----------------------- Write command file (param.in) ------------------
-        cfg = ModelConfig(hydro=self.hydro_config,t0=t0,logger=self.logger)
+        cfg = ModelConfig(hydro=self.hydro_config,t0=t0,t1=t1,logger=self.logger)
         cfg.make_config(self.param_tmp,join(self.rootdir,'param.nml'),'hydro')
 
         # #----------------------- Set Boundary Conditions (bctides.in) -----------
         # # Store boundary arrays in each obc bctype object (Ex: self.obc['btype']['7']['iettype'])
 
-        bcinput = BCinputs(obc=self.obc,nnode=self.hgrid.nnode, lat0=lat0,t0=t0, logger=self.logger)
+        bcinput = BCinputs(obc=self.obc,hgrid=self.hgrid, lat0=lat0,t0=t0, logger=self.logger)
         bcinput.make_bctides(join(self.rootdir,'bctides.in'))
 
        #  # ------------------- Create Ocean boundary forcing -----------------

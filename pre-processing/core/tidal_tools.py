@@ -10,6 +10,7 @@ from ttide.t_predic import t_predic
 from vcmq import regrid2d,create_grid,MV2,set_grid,griddata,grid2xy
 #from regrid import horizontal
 from vacumm.misc.grid.regridding import fill2d
+import copy
 
 def missing_interp(lon,lat,arr):
 	grid0 = create_grid(lon[0,:], lat[:,0])
@@ -126,9 +127,15 @@ def extract_HC(modfile,Vars, lon, lat, conlist=None, logger=None):
 
 	return var,tfreq,consindex
 
-def get_tide(ju,freq,tidecon,t_time,lat0):
-	
+def get_tide(ju,freq,tidecon0,t_time,lat0):
+	tidecon=copy.deepcopy(tidecon0)
 	nodes=tidecon.shape[2]
+
+	
+	#tidecon[:,0,:]=tidecon[:,0,:]+tidecon[:,0,:]*50/100
+
+	#print('!!!!!!ADDING 50%!!!!!!!!!!!!!!')
+
 
 
 
