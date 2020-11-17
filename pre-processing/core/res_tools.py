@@ -2,11 +2,11 @@ import os
 import numpy as np
 #import regrid
 from netCDF4 import Dataset
-import cdms2
-#from scipy.interpolate import griddata,interp1d
-from vcmq import fill2d,grid2xy,griddata,create_time
-from vacumm.misc.grid.regridding import GridData
-from vacumm.misc.grid.kriging import krig
+# import cdms2
+# #from scipy.interpolate import griddata,interp1d
+# from vcmq import fill2d,grid2xy,griddata,create_time
+# from vacumm.misc.grid.regridding import GridData
+# from vacumm.misc.grid.kriging import krig
 
 def vertical_extrapolation(u,dep,lev=[],z0=[]):
 	zu=np.zeros(shape=(dep.shape))

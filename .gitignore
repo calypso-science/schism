@@ -219,4 +219,10 @@ pip-log.txt
 
 *.nc.gz
 docker/build/pgilinux-2019-1910-x86-64.tar.gz
-pre-processing/core/pymo_stuff.py
+docker/nvhpc-20-9-20.9-1.x86_64.rpm
+
+
+
+
+
+docker/pgilinux-2019-1910-x86-64.tar.gz

@@ -54,8 +54,8 @@ ENV = HYDRO
 # Note: use /usr/lib64/openmpi/bin/mpirun to run compiled SCHISM executables
 ################################################################################
 
-FCS = /usr/local/pgi/linux86-64/19.10/mpi/openmpi-3.1.3/bin/mpif90
-FCP = /usr/local/pgi/linux86-64/19.10/mpi/openmpi-3.1.3/bin/mpif90
+FCS = mpif90
+FCP = mpif90
 FLD = $(FCP)
 # MPI vserion (1 or 2) 
 PPFLAGS := $(PPFLAGS) -DMPIVERSION=2 #-DUSE_WRAP
@@ -64,7 +64,7 @@ FCPFLAGS = $(PPFLAGS) $(OPTFLAGS) #-g -fbacktrace #-finit-real=nan -fbounds-chec
 FLDFLAGS = $(OPTFLAGS) #for final linking of object files
 
   #####Libraries
-MTSLIBS = -L./ParMetis-3.1-Sep2010/ -lparmetis -lmetis
+MTSLIBS = -L./ParMetis-4.0.3/ -lparmetis -lmetis
 CDFLIBS = -L/usr/local/lib/ -lnetcdff -lnetcdf -lhdf5_hl -lhdf5 -lz -ldl
 CDFMOD = -I/usr/local/include/ # modules for netcdf
 

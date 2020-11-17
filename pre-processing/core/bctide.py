@@ -40,9 +40,9 @@ def t_equilib(freq,doodsonamp,doodsonspecies,lat0):
   G1[3+3-1,0]=        G*clat**3;
 
   idx=[int(idx) for idx in doodsonspecies+3-1]
-  amp=np.abs(doodsonamp/gfac*G1[np.ix_(idx)].T)
-
-  return amp[0]
+  #amp=np.abs(doodsonamp/gfac*G1[np.ix_(idx)].T)[0]
+  amp=doodsonamp/3.747394476289734
+  return amp
    
 
 def Calculate(lat, t0, cons,typ=0):
@@ -112,6 +112,14 @@ class BCinputs(object):
 
 
 
+    def update_bctide(self,filin,rnday,soft='./tide_fac'):
+        f=open('date_param.txt', 'w')
+        # 48-character start time info string (only used for visualization with xmvis6)
+        f.write('%s%i\n' % (self.t0.strftime('%H,%d,%m,%Y,'),rnday))
+        f.flush()
+        f.close()
+        os.system(soft)
+        
 
 
     
@@ -360,6 +368,14 @@ class BCinputs(object):
         talpha, tfreq, tear, tnf = Calculate(self.lat0, self.t0dec, self.obc['cons'].split(' '))
         if 'tp cons' in self.obc:
           tpalpha,tpspec,tpamp, tpfreq, tpear, tpnf = Calculate(self.lat0, self.t0dec, self.obc['tp cons'].split(' '),1)
+        else:
+          tpalpha=[]
+          tpspec=[]
+          tpamp=[]
+          tpfreq=[]
+          tpear=[]
+          tpnf=[]
+
 
         
 

@@ -1,0 +1,21 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module interpz ! in 
+    interface  ! in :interpz
+        subroutine interpz1d(varin,zin,zout,np,nzin,nzout,kz,null_value,varout) ! in :interpz:interpz.f90
+            real(kind=8) dimension(np,nzin),intent(in) :: varin
+            real(kind=8) dimension(np,nzin),intent(in),depend(np,nzin) :: zin
+            real(kind=8) dimension(nzout),intent(in) :: zout
+            integer, optional,intent(in),check(shape(varin,0)==np),depend(varin) :: np=shape(varin,0)
+            integer, optional,intent(in),check(shape(varin,1)==nzin),depend(varin) :: nzin=shape(varin,1)
+            integer, optional,intent(in),check(len(zout)>=nzout),depend(zout) :: nzout=len(zout)
+            integer intent(in) :: kz
+            real(kind=8) intent(in) :: null_value
+            real(kind=8) dimension(np,nzout),intent(out),depend(np,nzout) :: varout
+        end subroutine interpz1d
+    end interface 
+end python module interpz
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

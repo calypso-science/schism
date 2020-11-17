@@ -420,6 +420,7 @@ class VQS():
 		
 	def export_vgrid(self,fileout):
 #     Output in SELFE convention
+		fileout=fileout[0]
 		a=open(fileout,'w')
 		a.write('%12i \n' % 1)
 		nvrt=self.sigma_vqs.shape[0]-1

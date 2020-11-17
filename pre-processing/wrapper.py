@@ -9,7 +9,13 @@ import yaml
 import json
 import logging
 import dateutil
-from matplotlib.dates import num2date,date2num
+from matplotlib.dates import num2date,date2num,set_epoch
+import matplotlib.dates as mpld
+import six
+
+
+set_epoch('0000-12-31T00:00:00')
+
 from hgrid import HorizontalGrid
 from vgrid import VerticalGrid
 from param import ModelConfig
@@ -34,7 +40,7 @@ class SCHISM():
     '''
 
     def __init__(self, rootdir, hydro_config,vgrid_config,obc,param_tmp,exec_bin,
-                 hgrid_file,timing,input_files,forcings=None,ic=None,meteo=None,stations=None,
+                 hgrid_file,timing,input_files=None,forcings=None,ic=None,meteo=None,stations=None,
                  indir=None,
                  logdir=None,
                  errors=None,
@@ -113,17 +119,26 @@ class SCHISM():
 
 
         lat0=sum(self.hgrid.latitude)/len(self.hgrid.latitude)
-        t0 = dateutil.parser.parse(self.timing["time start"])
-        t1 = dateutil.parser.parse(self.timing["time end"])
+        self.logger.info('\tModel starts: %s' % (self.timing["time start"]))
+        self.logger.info('\tModel ends: %s' % (self.timing["time end"]))
+        if isinstance(self.timing["time start"], str):
+            t0 = dateutil.parser.parse(self.timing["time start"])
+        else:
+            t0=self.timing["time start"]
+        if isinstance(self.timing["time end"], str):
+            t1 = dateutil.parser.parse(self.timing["time end"])
+        else:
+            t1=self.timing["time end"]
 
         #  #----------------------- Download Initial and Boundary fields ---------- 
-        dwnl=download_data(t0,t1,logger=self.logger)
-        for file in self.input_files.keys():     
-          dwnl.get_input_data(self.input_files[file])
+        if self.input_files!=None:
+            dwnl=download_data(t0,t1,logger=self.logger)
+            for file in self.input_files.keys():     
+              dwnl.get_input_data(self.input_files[file])
 
 
-        self.logger.info('----------------------------------------------------------')
-        #----------------------- Write command file (param.in) ------------------
+            self.logger.info('----------------------------------------------------------')
+            #----------------------- Write command file (param.in) ------------------
         cfg = ModelConfig(hydro=self.hydro_config,t0=t0,t1=t1,logger=self.logger)
         cfg.make_config(self.param_tmp,join(self.rootdir,'param.nml'),'hydro')
 
@@ -134,16 +149,17 @@ class SCHISM():
         bcinput.make_bctides(join(self.rootdir,'bctides.in'))
 
        #  # ------------------- Create Ocean boundary forcing -----------------
-        for key in self.forcings.keys():
-          if not os.path.isfile(join(self.rootdir,key)):
-            Obf = OpenBoundaries(obc=self.forcings[key],hgrid=self.hgrid,vgrid=self.vgrid,t0=t0,t1=t1, logger=self.logger)
-            if 'tidal' in self.forcings[key]:
-              Obf.add_tide(self.forcings[key]['tidal'])
+        if self.forcings:
+          for key in self.forcings.keys():
+            if not os.path.isfile(join(self.rootdir,key)):
+              Obf = OpenBoundaries(obc=self.forcings[key],hgrid=self.hgrid,vgrid=self.vgrid,t0=t0,t1=t1, logger=self.logger)
+              if 'tidal' in self.forcings[key]:
+                Obf.add_tide(self.forcings[key]['tidal'])
 
-            if 'residual' in self.forcings[key]:
-              Obf.add_res(self.forcings[key]['residual'])
+              if 'residual' in self.forcings[key]:
+                Obf.add_res(self.forcings[key]['residual'])
 
-            Obf.make_boundary(join(self.rootdir,key),self.forcings[key].get('dt',3600))
+              Obf.make_boundary(join(self.rootdir,key),self.forcings[key].get('dt',3600))
 
 
        #  # ------------------- Create Oceanic initial conditions ---------------------

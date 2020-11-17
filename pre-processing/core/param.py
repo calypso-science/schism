@@ -79,8 +79,10 @@ class ModelConfig(object):
         ''' Docstring'''
         default={}
         if module is 'hydro':
+
             default['ibcc']=0
             default['ibtp']=1
+            default['itransport_only']=0
             default['rnday']=30
             default['dt']=100
             default['ntracer_gen']=0
@@ -129,6 +131,9 @@ class ModelConfig(object):
             default['dtb_min']=10
             default['inter_mom']=0
             default['kr_co']=1
+            default['ielm_transport']=0
+            default['max_subcyc']=10
+
             default['itr_met']=3
             default['h_tvd']=5
             default['eps1_tvd_imp']=1e-4
@@ -145,6 +150,10 @@ class ModelConfig(object):
             default['impose_net_flux']=0
             default['ihconsv']=0
             default['isconsv']=0
+            default['i_hmin_airsea_ex']=2
+            default['hmin_airsea_ex']=0.2
+
+
             default['itur']=3
             default['dfv0']=1e-2
             default['dfh0']=1e-4
@@ -177,7 +186,7 @@ class ModelConfig(object):
             default['AGE_1']="'0'" #
 
             default['flag_ic_gen']=0 #EN (user defined module)
-            default['flag_ic_age']=0 #Age
+            #default['flag_ic_age']=0 #Age
       
             default['flag_ic_timor']=0 #TIMOR
             default['flag_ic_fabm']=0 #FABM

@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 from matplotlib.tri import Triangulation
 from matplotlib.widgets import LassoSelector
 from matplotlib.path import Path
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
 from PyQt5 import QtCore, QtGui, uic

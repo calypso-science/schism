@@ -1,11 +1,10 @@
 #!/usr/bin/env python3.7
 import copy
 import numpy as np
-import netCDF4
+import cdms2
 
-from interp2D import mask_interp
-#from vacumm.misc.grid.regridding import fill2d
-#from vcmq import create_time,grid2xy,extend2d
+from vacumm.misc.grid.regridding import fill2d
+from vcmq import create_time,grid2xy,extend2d
 
 from matplotlib.dates import date2num,num2date
 import fiona
@@ -69,33 +68,19 @@ class InitialConditions(object):
         self.hgrid.write(self.fileout)
         self.logger.info("  %s exported"%self.fileout)
     def _create_nc_gr3(self,ncfile,var):
-        data=netCDF4.Dataset(ncfile)
-            # Read the grid file
-        X=data.variables['lon'][:]
-        Y=data.variables['lat'][:]
-        if len(X.shape)==1:
-            xx, yy = np.meshgrid(X, Y)
-
+        data=cdms2.open(ncfile)
+        
         lon=self.hgrid.longitude
         lat=self.hgrid.latitude
+        src=fill2d(data[var][:], method='carg')
+        time0=[t.torelative('days since 1-1-1').value for t in data['time'].asRelativeTime()]
+        tin=create_time(np.ones(len(lon))*date2num(self.t0)+1,units='days since 1-1-1')
+        tb=grid2xy(src,xo=lon,yo=lat,method='linear',to=tin)
 
-        
-
-        time0=netCDF4.num2date(data['time'][:],data['time'].units)
-        time0=[np.datetime64(x) for x in time0]
-
-        geo_idx = (np.abs(date2num(time0)-date2num(self.t0))).argmin() # closest timestep
-
-        varin=data[var][geo_idx]
-        if len(varin.shape)>2:
-            varin=varin[0] # get surface level
-
-        src=mask_interp(xx,yy,varin)
-
-        tb=src(np.vstack((lon,lat)).T)
-
-        if np.any(np.isnan(tb)):
-            import pdb;pdb.set_trace()
+        if np.any(tb.mask==True):
+            bad=(tb.mask==True).nonzero()[0]
+            tin_bad=create_time(np.ones(len(bad))*date2num(self.t0)+1,units='days since 1-1-1')
+            tb[bad]=grid2xy(src,xo=np.array(lon)[bad].tolist(),yo=np.array(lat)[bad].tolist(),method='nearest',to=tin_bad)
 
         self._create_constante_gr3(tb)
 

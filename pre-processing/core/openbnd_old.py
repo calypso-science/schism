@@ -4,14 +4,12 @@ from matplotlib.dates import num2date,date2num
 from tidal_tools import extract_HC,get_tide
 from res_tools import get_file_interpolator,vertical_extrapolation
 from filetype import create_ncTH
-import xarray as xr
-from interp2D import mask_interp
-# import cdms2
-# from vcmq import fill2d,grid2xy,griddata,create_time,create_depth,create_axis,MV2,N
+
+from vcmq import fill2d,grid2xy,griddata,create_time,create_depth,create_axis,MV2,N
 import scipy.io
 from scipy.interpolate import griddata,interp1d
 
-import time
+
 
 
 class OpenBoundaries(object):
@@ -80,7 +78,7 @@ class OpenBoundaries(object):
 
     def add_res(self,res):
 
-       self.res_file=xr.open_dataset(res['filename'])
+       self.res_file=netCDF4.Dataset(res['filename'])
        self.res_vars=res['vars']
        self.residual=True
        if len(self.res_vars)>1:
@@ -102,17 +100,7 @@ class OpenBoundaries(object):
             self.i23d=3
 
 
-        tin=[np.datetime64(num2date(x)) for x in TimeSeries]
-        if self.residual:
-            if 'longitude' in self.res_file.dims:
-                lon_name='longitude'
-                lat_name='latitude'
-            else:
-                lon_name='lon'
-                lat_name='lat'                
-
-            xx,yy=np.meshgrid(self.res_file[lon_name][:],self.res_file[lat_name][:])
-
+         
         # create file
         if self.i23d==3:
             Nlev=self.zz.shape[1]
@@ -124,6 +112,7 @@ class OpenBoundaries(object):
 
 
         for n in range(0,len(TimeSeries)):
+            tin=create_time(np.ones(len(self.llon)*Nlev)*(TimeSeries[n]+1),units='days since 1-1-1')
 
             total=np.zeros(shape=(self.ivs,len(self.llon),Nlev))
 
@@ -142,42 +131,45 @@ class OpenBoundaries(object):
 
 
             if self.residual:
-                
                 var=self.res_vars
 
                 for i,v in enumerate(sorted(var)):
                     arri=self.res_file[v][:]
-                    
-                    arri_time=arri.interp(time=tin[n])
-                    
                     if self.i23d >2:
-                        tb=np.ndarray((len(self.llon),Nlev))
-                        tmp=np.ndarray((len(self.llon),arri_time.shape[0]))*np.nan
-                        for nlev in range(0,arri_time.shape[0]):
-                            if np.any(arri_time[nlev].to_masked_array()):
-                                arr=mask_interp(xx,yy,arri_time[nlev].to_masked_array())
-                                if len(arr.z)>6:
-                                    tmp[:,nlev]=arr(np.vstack((self.llon,self.llat)).T, nnear=6, p=2)
-
-
-                        zi=self.res_file['lev'][:].values
-                        if np.mean(zi)>0:
+                       dep=create_depth(arri.getAxis(1)[:])
+                       extra = create_axis(N.arange(1), id='member')
+                       arri2=np.tile(arri,[1,1,1,1,1])
+                       arri3 = MV2.array(arri2,axes=[extra,arri.getAxis(0), dep, arri.getAxis(2), arri.getAxis(3)], copy=False,fill_value=1e20)
+                      
+                       zi=arri.getAxis(1)[:]
+                       if np.mean(zi)>0:
                           zi=zi*-1
+                       tb=grid2xy(arri3,xo=np.tile(self.llon,[Nlev,1]).T.flatten(),yo=np.tile(self.llat,[Nlev,1]).T.flatten(),zo=self.zz.flatten(),method='linear',to=tin,zi=zi)
 
-                       
-                        for p in range(0,tmp.shape[0]):
-                            bad=np.isnan(tmp[p,:])
-                            caca=interp1d(zi[~bad],tmp[p,~bad],fill_value="extrapolate")
-                            tb[p,:]=caca(self.zz[p,:])
+                    else:
+                       tb=grid2xy(arri,xo=self.llon,yo=self.llat,method='linear',to=tin)
+
+                    if np.any(tb.mask==True):
+                        bad=tb.mask==True
+                        if len(bad.shape)>1:
+                            bad=bad[0,:]
+                        tin_bad=create_time(np.ones(len(bad))*(TimeSeries[n]+1),units='days since 1-1-1')
+                        
+                        if self.i23d >2:
+                            llon=np.tile(self.llon,[Nlev,1]).T.flatten()
+                            llat=np.tile(self.llat,[Nlev,1]).T.flatten()
+                            zz=self.zz.flatten()
+                            zi=arri.getAxis(1)[:]
+                            if np.mean(zi)>0:
+                                zi=zi*-1
+
+                            tb[0,bad]=grid2xy(arri3,xo=llon[bad],yo=llat[bad],zo=zz[bad],method='nearest',to=tin_bad,zi=zi)
+
+                        else:
+                            tb[bad]=grid2xy(arri,xo=np.array(self.llon)[bad].tolist(),yo=np.array(self.llat)[bad].tolist(),method='nearest',to=tin_bad)
 
 
-
-                    else:    
-                        arr=mask_interp(xx,yy,arri_time.to_masked_array())
-                        tb=arr(np.vstack((self.llon,self.llat)).T, nnear=6, p=2)
-
-
-                    if np.any(np.isnan(tb)):
+                    if np.any(tb.mask==True):
                         print('probleme')
 
 
@@ -195,7 +187,7 @@ class OpenBoundaries(object):
                 self.logger.info('For timestep=%.f, max=%.4f, min=%.4f , max abs diff=%.4f' % (TimeSeries[n],total.max(),total.min(),abs(np.diff(total,n=1,axis=0)).max()))
             
             time_Series[n,:,:,:]=total
-
+  
         nc.close()
 
     def create_th(self,fileout,TimeSeries,options):

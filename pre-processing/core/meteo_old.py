@@ -54,7 +54,7 @@ class Meteo(object):
 
         self._initialise(in_dir)
         self._make_sflux_txt()
-        self.Tforcing=np.arange(date2num(t0),date2num(t1)+1,dt/(24.))
+        self.Tforcing=np.arange(date2num(t0),date2num(t1)+1,dt/(24.))+1
 
         self.dataset=[]
         self.lon=[]
@@ -76,29 +76,18 @@ class Meteo(object):
 
 
     def add_dataset(self,filename,vardict):
-        data=xr.open_dataset(filename)
-        if 'longitude' in data.dims:
-            lon_name='longitude'
-            lat_name='latitude'
-        else:
-            lon_name='lon'
-            lat_name='lat'   
-
+        data=cdms2.open(filename)
         var={}
         for key in vardict.keys():
-            if vardict[key] in data:
-                arri=data[vardict[key]][:]
-                var[key] =arri.interpolate_na(dim='time',method='nearest')
-                if 'rh2m' in vardict[key]:
-                    self.rh2m=True
-            else:
-                var[key]=vardict[key]
-
-
+            src=fill2d(data[vardict[key]][:], method='carg')
+            time0=[t.torelative('days since 1-1-1').value for t in data['time'].asRelativeTime()]
+            var[key] = interp1d(time0, src, axis=0,fill_value=np.nan)
+            if 'rh2m' in vardict[key]:
+            	self.rh2m=True
 
 
         self.dataset.append(var)
-        [lon,lat]=np.meshgrid(data[lon_name][:],data[lat_name][:])
+        [lon,lat]=np.meshgrid(src.getAxis(2)[:],src.getAxis(1)[:])
         self.lon.append(lon)
         self.lat.append(lat)
 
@@ -116,7 +105,6 @@ class Meteo(object):
 
             for k in range(0,len(unique_days)):
                 t=np.arange(unique_days[k],unique_days[k]+1-dt,dt)
-                tin=[np.datetime64(num2date(x)) for x in t]
 
                
                 for n,dataset in enumerate(self.dataset):
@@ -127,20 +115,18 @@ class Meteo(object):
                     temp,root_grp=create_netcdf_file(os.path.join(self.input_dir,netcdf_name),self.lon[n],self.lat[n],t,file_sections[section])
                    
                     for var in file_sections[section]:
-                        if hasattr(dataset[var],'interp'):
-                            tmp=dataset[var].interp(time=tin)
-                            if self.rh2m and var is 'prmsl':
-                              prmsl=tmp
-                            if self.rh2m and var is 'stmp':
-                           	  stmp=tmp
-                            if self.rh2m and var is 'spfh':
-                              tmp=rh2sh(tmp/100.,prmsl,stmp)
+
+                        tmp=dataset[var](t)
+                        if self.rh2m and var is 'prmsl':
+                          prmsl=tmp
+                        if self.rh2m and var is 'stmp':
+                       	  stmp=tmp
+                        if self.rh2m and var is 'spfh':
+                          tmp=rh2sh(tmp/100.,prmsl,stmp)
 
 
-                            for nn in range(0,tmp.shape[0]):
-                                temp[var][nn,:,:]=tmp[nn,:,:]
-                        else:
-                            temp[var][nn,:,:]=dataset[var]
+                        for nn in range(0,tmp.shape[0]):
+                            temp[var][nn,:,:]=tmp[nn,:,:].T 
 
 
                     root_grp.close()
