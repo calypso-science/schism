@@ -410,7 +410,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
     if type(levs)!=type([]):
         levs=[levs]
 
-    print(lim)
+    print(type(lim))
     if INDstart==0:
         INDstart=get_INDstart(dirout,prefix)
 
