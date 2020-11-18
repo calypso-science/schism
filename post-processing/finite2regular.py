@@ -410,7 +410,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
     if type(levs)!=type([]):
         levs=[levs]
 
-    print(type(lim))
+
     if INDstart==0:
         INDstart=get_INDstart(dirout,prefix)
 
@@ -466,7 +466,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
             ds[v]=ds[v][:].fillna(1e20)
 
 
-    fileout=fileout.replace('.nc',netCDF4.num2date(Ts,unit)[0].strftime('%Y%m%d_%Hz.nc'))  
+    fileout=fileout.replace('.nc','')+netCDF4.num2date(Ts,unit)[0].strftime('%Y%m%d_%Hz.nc')
     ds.to_netcdf(fileout)
 
 if __name__ == "__main__":
