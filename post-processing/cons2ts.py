@@ -449,6 +449,7 @@ def get_tide(ju,freq,tidecon0,t_time,lat0):
 
     return tide
 def process(fileout,gridfile,consfile,tstart,tend,dt,params,res,Cons,levs,min_depth,lim):
+    print(lim)
     if type(levs)!=type([]):
         levs=[levs]
 

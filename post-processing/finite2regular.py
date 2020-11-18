@@ -14,7 +14,11 @@ from pyproj import Proj,transform
 from descartes.patch import PolygonPatch
 from shapely.ops import cascaded_union
 from shapely.geometry import Point, Polygon
-import interpz
+import glob
+try:
+    import interpz
+except:
+    print('no vertical interpolation')
         # dset = xr.Dataset(dset_dict)
         # dset.attrs = dict(type="SCHISM standard output file")
         # dset.to_netcdf(path=join(self.nest.outdir, self.filename_dict[outtype]), format='NETCDF4')
@@ -89,17 +93,27 @@ class MakeMeshMask():
 
     def order_segments(self, segments):
         '''Docstring'''
-        ordered_nodes = list()
+
         consume_nodes = segments.tolist()
+        ordered_nodes=[consume_nodes.pop(0)]
+
         while consume_nodes:
-            for s, segment in enumerate(segments):
-                if not ordered_nodes:
-                    ordered_nodes.append(consume_nodes.pop(consume_nodes.index(segment)))
-                    continue
-                for seg in consume_nodes:
-                    if seg[0] == ordered_nodes[-1][-1]:
-                        ordered_nodes.append(consume_nodes.pop(consume_nodes.index(seg)))
-                        break
+            for s,seg in enumerate(consume_nodes):
+                if ordered_nodes[-1][-1]==seg[0]:
+                    nodes=consume_nodes.pop(s)
+                    ordered_nodes.append(nodes)
+                elif ordered_nodes[-1][-1]==seg[-1]:
+                    nodes=consume_nodes.pop(s)[::-1]
+                    ordered_nodes.append(nodes)
+                elif ordered_nodes[0][0]==seg[0]:
+                    nodes=consume_nodes.pop(s)[::-1]
+                    ordered_nodes=[nodes]+ordered_nodes
+                elif ordered_nodes[0][0]==seg[-1]:
+                    nodes=consume_nodes.pop(s)
+                    ordered_nodes=[nodes]+ordered_nodes                  
+
+
+        
         return ordered_nodes
 
     def get_mesh_polygon(self):
@@ -224,7 +238,7 @@ def create_dataset(times,unit,X,Y,Vars,depth,lev=0):
 
 
         if var == 'hvel':
-            dset['ut']=xr.DataArray(
+            dset['u']=xr.DataArray(
                     data   = np.random.random((len(times),len(lev),X.shape[0],X.shape[1])),   # enter data here
                     dims   = ['time','lev','lat','lon'],
                     coords = {'time': times,
@@ -234,13 +248,13 @@ def create_dataset(times,unit,X,Y,Vars,depth,lev=0):
                     attrs  = {
                         '_FillValue': 1e20,
                         'units'     : 'm.s^{-1}',
-                        'long_name': 'Eastward tidal current',
-                        'standard_name': 'eastward_sea_water_velocity_due_to_tides',
+                        'long_name': 'Eastward current',
+                        'standard_name': 'eastward_sea_water_velocity',
                         }
                     )
 
 
-            dset['vt']=xr.DataArray(
+            dset['v']=xr.DataArray(
                     data   = np.random.random((len(times),len(lev),X.shape[0],X.shape[1])),   # enter data here
                     dims   = ['time','lev','lat','lon'],
                     coords = {'time': times,
@@ -250,13 +264,13 @@ def create_dataset(times,unit,X,Y,Vars,depth,lev=0):
                     attrs  = {
                         '_FillValue': 1e20,
                         'units'     : 'm.s^{-1}',
-                        'long_name': 'Northward tidal current',
-                        'standard_name': 'northward_sea_water_velocity_due_to_tides',
+                        'long_name': 'Northward current',
+                        'standard_name': 'northward_sea_water_velocity',
                         }
                     )
 
         if var == 'dahv':
-            dset['umt']=xr.DataArray(
+            dset['um']=xr.DataArray(
                     data   = np.random.random((len(times),X.shape[0],X.shape[1])),   # enter data here
                     dims   = ['time','lat','lon'],
                     coords = {'time': times,
@@ -265,14 +279,14 @@ def create_dataset(times,unit,X,Y,Vars,depth,lev=0):
                     attrs  = {
                         '_FillValue': 1e20,
                         'units'     : 'm.s^{-1}',
-                        'long_name': 'Eastward depth-averaged tidal current',
-                        'standard_name': 'barotropic_eastward_sea_water_velocity_due_to_tides',
+                        'long_name': 'Eastward depth-averaged current',
+                        'standard_name': 'barotropic_eastward_sea_water_velocity',
                         }
                     )
 
 
 
-            dset['vmt']=xr.DataArray(
+            dset['vm']=xr.DataArray(
                     data   = np.random.random((len(times),X.shape[0],X.shape[1])),   # enter data here
                     dims   = ['time','lat','lon'],
                     coords = {'time': times,
@@ -281,8 +295,8 @@ def create_dataset(times,unit,X,Y,Vars,depth,lev=0):
                     attrs  = {
                         '_FillValue': 1e20,
                         'units'     : 'm.s^{-1}',
-                        'long_name': 'Northward depth-averaged tidal current',
-                        'standard_name': 'barotropic_nortward_sea_water_velocity_due_to_tides',
+                        'long_name': 'Northward depth-averaged current',
+                        'standard_name': 'barotropic_nortward_sea_water_velocity',
                         }
                     )
 
@@ -380,12 +394,31 @@ def read_initial_netcdf_file(file0,file1,epsg,lim,min_depth):
     nc1.close()
 
     return times,X,Y,depth,gd,unit
+def get_INDstart(dirout,prefix):
+    all_file=glob.glob(os.path.join(dirout,prefix+'*'))
+    all_file=sorted(all_file)
+    return int(all_file[0].split('_')[-1].replace('.nc',''))
 
-def process(fileout,dirout,INDstart,INDend,params,res,levs,min_depth,lim,prefix,epsg):
+def get_INDend(dirout,prefix):
+    all_file=glob.glob(os.path.join(dirout,prefix+'*'))
+    all_file=sorted(all_file)
+    return int(all_file[-1].split('_')[-1].replace('.nc',''))
+
+
+
+def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,prefix,epsg):
     if type(levs)!=type([]):
         levs=[levs]
 
-    msk=MakeMeshMask(lim,res,'/home/remy/Calypso/Projects/006_Southport/hydro/child/hgrid6.gr3')
+
+    if INDstart==0:
+        INDstart=get_INDstart(dirout,prefix)
+
+    if INDend==0:
+        INDend=get_INDend(dirout,prefix)
+
+
+    msk=MakeMeshMask(lim,res,hgrid)
     Mask=msk.make_grid_mask()
     mask = Mask.mask.values
     if lim == None:
@@ -413,14 +446,6 @@ def process(fileout,dirout,INDstart,INDend,params,res,levs,min_depth,lim,prefix,
         Z=extract_raw(fileIN,params, lim, gd,lev=levs)
         for vv in Z:
             v=vv.replace('elev','ssh')
-            if v=='u':
-                v=v.replace('u','ut')
-            if v=='v':
-                v=v.replace('v','vt')            
-            if v=='um':
-                v=v.replace('um','umt')
-            if v=='vm':
-                v=v.replace('vm','vmt')
 
             for n in range(Z[vv].shape[0]):
                 if len(Z[vv].shape)==3:
@@ -441,14 +466,16 @@ def process(fileout,dirout,INDstart,INDend,params,res,levs,min_depth,lim,prefix,
             ds[v]=ds[v][:].fillna(1e20)
 
 
-
+    fileout=fileout.replace('.nc',netCDF4.num2date(Ts,unit)[0].strftime('%Y%m%d_%Hz.nc'))  
     ds.to_netcdf(fileout)
+
 if __name__ == "__main__":
     
     import argparse
     parser = argparse.ArgumentParser(prog='cons2ts.py', usage='%(prog)s fileout consfile params tstart tend [options]')
     ## main arguments
     parser.add_argument('fileout', type=str,help='name of the output tidal file')
+    parser.add_argument('hgrid', type=str,help='name of the output tidal file')
     parser.add_argument('dirout', type=str,help='Folder with all the SCHSIM files')
     parser.add_argument('INDstart', type=int,help='First file to take')
     parser.add_argument('INDend', type=int,help='Last file to take')
@@ -463,9 +490,9 @@ if __name__ == "__main__":
     parser.add_argument('--epsg', type=float,default=2193,help='epsg')
     
     args = parser.parse_args()
-    
 
     process(args.fileout,\
+        args.hgrid,\
         args.dirout,\
         args.INDstart,args.INDend,\
         args.params,\
