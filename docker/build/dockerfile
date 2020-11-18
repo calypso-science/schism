@@ -169,6 +169,8 @@ RUN cd /usr/src/schism/src/ParMetis-4.0.3 &&\
     make
 
 
+RUN cd /usr/src/schism/ &&\
+    git checkout tags/v5.8.0
 
 ADD Make.defs.local /usr/src/schism/mk/
 ADD include_modules /usr/src/schism/mk/
@@ -176,9 +178,19 @@ ADD include_modules /usr/src/schism/mk/
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
 ENV PATH=$PATH:/opt/nvidia/hpc_sdk/Linux_x86_64/20.7/comm_libs/openmpi/openmpi-3.1.5/bin/
 
+
 RUN cd /usr/src/schism/src/ &&\
     make clean &&\
     make psc
-#
+
+RUN cd /usr/src/schism/src/Utility/Combining_Scripts/ &&\
+    pgfortran -cpp -O2 -o combine_output11 ../UtilLib/argparse.f90 ../UtilLib/schism_geometry.f90 combine_output11.f90 -I/usr/local/include -L/usr/local/lib/ -lnetcdff -lnetcdf -lhdf5_hl -lhdf5 -lz -ldl &&\
+    cp combine_output11 /usr/local/lib
+
+RUN cd /usr/src/schism/src/Utility/Combining_Scripts/ &&\
+    pgfortran -cpp -O2 -mcmodel=medium -o combine_hotstart7 ../UtilLib/argparse.f90 ../UtilLib/schism_geometry.f90 combine_hotstart7.f90 -I/usr/local/include -L/usr/local/lib/ -lnetcdff -lnetcdf -lhdf5_hl -lhdf5 -lz -ldl &&\
+    cp combine_hotstart7 /usr/local/lib
+
+
 
 
