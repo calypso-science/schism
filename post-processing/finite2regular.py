@@ -3,14 +3,9 @@ import sys
 sys.path.append('/home/remy/Calypso/Software/schism-dev/pyschism') 
 from netCDF4 import Dataset
 import netCDF4
-from ttide.t_tide import t_tide
-from ttide.t_getconsts import t_getconsts
-from ttide.t_vuf import t_vuf
-from ttide import t_utils as tu
 import xarray as xr
 import os
 import numpy as np
-from matplotlib.dates import num2date,date2num
 import copy
 import pandas as pd
 from scipy.interpolate import griddata

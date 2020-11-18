@@ -77,6 +77,13 @@ RUN pip3 install xarray
 RUN cd /usr/local/lib/python3.6/site-packages/pyschism/mesh/ &&\
     sed -i "s|                    assert IDtag in self.coords_id, msg|#                    assert IDtag in self.coords_id, msg|g" base.py 
 
+
+
+RUN cd /usr/src/ &&\
+    git clone https://github.com/calypso-science/schism.git 
+
+RUN pip3 install descartes
+
 ## TO CHANGE
 #/opt/conda/envs/schism/lib/python3.6/site-packages/pyschism/driver/driver.py
 

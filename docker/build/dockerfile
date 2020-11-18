@@ -185,11 +185,11 @@ RUN cd /usr/src/schism/src/ &&\
 
 RUN cd /usr/src/schism/src/Utility/Combining_Scripts/ &&\
     pgfortran -cpp -O2 -o combine_output11 ../UtilLib/argparse.f90 ../UtilLib/schism_geometry.f90 combine_output11.f90 -I/usr/local/include -L/usr/local/lib/ -lnetcdff -lnetcdf -lhdf5_hl -lhdf5 -lz -ldl &&\
-    cp combine_output11 /usr/local/lib
+    cp combine_output11 /usr/local/bin
 
 RUN cd /usr/src/schism/src/Utility/Combining_Scripts/ &&\
     pgfortran -cpp -O2 -mcmodel=medium -o combine_hotstart7 ../UtilLib/argparse.f90 ../UtilLib/schism_geometry.f90 combine_hotstart7.f90 -I/usr/local/include -L/usr/local/lib/ -lnetcdff -lnetcdf -lhdf5_hl -lhdf5 -lz -ldl &&\
-    cp combine_hotstart7 /usr/local/lib
+    cp combine_hotstart7 /usr/local/bin
 
 
 
