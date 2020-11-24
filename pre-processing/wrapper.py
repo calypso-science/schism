@@ -214,10 +214,13 @@ def load_action(yfile):
     with open(yfile, 'r') as f:
         return yaml.load(f)
 
-def cycle_sim(action='tests/model.tinyapp.yml', **kwargs):
+def cycle_sim(action=None, **kwargs):
     """ Simulate scheduler call 
     """
-    config = load_action(action)
+    if action == None:
+      config={}
+    else:
+      config = load_action(action)
     config.update(kwargs)
     model = SCHISM(**config)
     model.prepare_run()
