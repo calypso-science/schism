@@ -55,7 +55,7 @@ class download_data(object):
         ' --longitude-min '+str(xmin)+' --longitude-max '+str(xmax)+' '+\
         '--latitude-min '+str(ymin)+' --latitude-max '+str(ymax)+' '+\
         '--date-min "'+(t0-datetime.timedelta(hours=12)).strftime('%Y-%m-%d %H:%M:00')+\
-        '" --date-max "'+(t1+datetime.timedelta(hours=12)).strftime('%Y-%m-%d %H:%M:00')
+        '" --date-max "'+(t1+datetime.timedelta(hours=12)).strftime('%Y-%m-%d %H:%M:00')+'"'
 
         var_url=''
         for var in nvar:
