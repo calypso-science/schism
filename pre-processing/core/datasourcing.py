@@ -29,8 +29,10 @@ class download_data(object):
         self.t0=t0
         self.t1=t1
 
-    def clean_mercator(filetmp):
-        import pdb;pdb.set_trace()
+    def clean_mercator(filein):
+        os.system("ncks -O --mk_rec_dmn time %s %s" %(filein, filein)) 
+        os.system("ncpdq -O -U %s %s" %(filein, filein)) 
+        os.system("ncatted -O -a _FillValue,,o,f,9.96920996838687e+36 %s %s" %(filein, filein))
     def download_mercator(self,fileout,source,t0,t1):
         
         service=source.get('service')
@@ -45,8 +47,6 @@ class download_data(object):
         root,filename=os.path.split(fileout)
         add_url=' --depth-min '+str(source.get('Grid').get('z',0))+' --depth-max '+str(source.get('Grid').get('z2',6000))
 
-        TRY=10
-
         for var in nvar:
             url='python3 -m motuclient --motu '+source.get('url')+' '+\
             '--service-id '+service+\
@@ -59,12 +59,11 @@ class download_data(object):
 
             url+=add_url
             url+=' --out-dir '+root+\
-            ' --out-name MERC_'+var+'_'+t0.strftime('%Y%m%d%H%M00')+'.nc'+\
+            ' --out-name '+var+'_'+t0.strftime('%Y%m%d%H%M00')+'.nc'+\
             ' --user '+user+' --pwd '+pwd
 
-            for itry in range(0,TRY):
+            for itry in range(0,10):
                 self.logger.info('Try #%i for %s' % (itry,var))
-                print(url)
                 os.system(url)
                 if os.path.isfile(os.path.join(root,var+'_'+t0.strftime('%Y%m%d%H%M00')+'.nc')):
                     break
