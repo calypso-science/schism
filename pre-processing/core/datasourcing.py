@@ -32,7 +32,7 @@ class download_data(object):
     def clean_mercator(filetmp):
         import pdb;pdb.set_trace()
     def download_mercator(self,fileout,source,t0,t1):
-        url=source.get('url')
+        
         service=source.get('service')
         product=source.get('product')
         xmin=source.get('Grid')['x']
@@ -49,9 +49,9 @@ class download_data(object):
             add_url=''
 
         TRY=10
-        print((t0-datetime.timedelta(hours=12)).strftime('%Y-%m-%d %H:%M:00'))
+
         for var in nvar:
-            url='python3 -m motuclient --motu '+url+' '+\
+            url='python3 -m motuclient --motu '+source.get('url')+' '+\
             '--service-id '+service+\
             ' --product-id '+product+\
             ' --longitude-min '+str(xmin)+' --longitude-max '+str(xmax)+' '+\
