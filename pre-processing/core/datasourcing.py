@@ -29,8 +29,47 @@ class download_data(object):
         self.t0=t0
         self.t1=t1
 
+    def clean_mercator(filetmp):
+        import pdb;pdb.set_trace()
+    def download_mercator(self,fileout,source,t0,t1):
+        url=source.get('url')
+        service=source.get('service')
+        product=source.get('product')
+        xmin=source.get('Grid')['x']
+        xmax=source.get('Grid')['x2']
+        ymin=source.get('Grid')['y']
+        ymax=source.get('Grid')['y2']
+        nvar=source.get('vars')
+        pwd=source.get('pass')
+        user=source.get('user')
+        root,filename=os.path.split(fileout)
+        if 'z' in source:
+            add_url=' --depth-min '+str(source.get('Grid').get('z'))+' --depth-max '+str(source.get('Grid').get('z2'))
+        else:
+            add_url=''
 
+        TRY=10
 
+        for var in nvar:
+            url='python -m motuclient --motu '+url+' '+\
+            '--service-id '+service+\
+            ' --product-id '+product+\
+            ' --longitude-min '+str(xmin)+' --longitude-max '+str(xmax)+' '+\
+            '--latitude-min '+str(ymin)+' --latitude-max '+str(ymax)+' '+\
+            '--date-min "'+t0.strftime('%Y-%m-%d %H:%M:00')+\
+            '" --date-max "'+(t1.strftime('%Y-%m-%d %H:%M:00')+\
+            '" --variable '+var
+            url+=add_url
+            url+=' --out-dir '+root+\
+            ' --out-name MERC_'+var+'_'+mnt.strftime('%Y%m%d%H%M00')+'.nc'+\
+            ' --user '+user+' --pwd '+pwd
+
+            for itry in range(0,TRY):
+                if logging:
+                    logging.info('Try #%i for %s' % (itry,var))
+                os.system(url)
+                if os.path.isfile(os.path.join(root,prf+'_'+mnt.strftime('%Y%m%d%H%M00')+'.nc')):
+                    break
 
     def download_hycom(self,fileout,source,t0,t1):
 
@@ -134,6 +173,9 @@ class download_data(object):
             if source['id'].lower()=='hycom':
                 self.download_hycom(filetmp,source,day,tend)
                 self.clean_hycom(filetmp)
+            if source['id'].lower()=='mercator':
+                self.download_mercator(filetmp,source,day,tend)
+                self.clean_mercator(filetmp)
             elif source['id'].lower()=='uds':
                 self.download_uds(filetmp,source,day,tend)
                 self.clean_uds(filetmp)
