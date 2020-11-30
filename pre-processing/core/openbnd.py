@@ -80,7 +80,10 @@ class OpenBoundaries(object):
 
     def add_res(self,res):
 
-       self.res_file=xr.open_dataset(res['filename'])
+       ds=xr.open_dataset(res['filename'])
+       
+       _, index = np.unique(ds['time'], return_index=True)
+       self.res_file=ds.isel(time=index)
        self.res_vars=res['vars']
        self.residual=True
        if len(self.res_vars)>1:
