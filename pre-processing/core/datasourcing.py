@@ -49,7 +49,7 @@ class download_data(object):
             add_url=''
 
         TRY=10
-
+        print((t0-datetime.timedelta(hours=12)).strftime('%Y-%m-%d %H:%M:00'))
         for var in nvar:
             url='python3 -m motuclient --motu '+url+' '+\
             '--service-id '+service+\
