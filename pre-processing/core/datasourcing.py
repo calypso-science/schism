@@ -43,10 +43,7 @@ class download_data(object):
         pwd=source.get('pass')
         user=source.get('user')
         root,filename=os.path.split(fileout)
-        if 'z' in source:
-            add_url=' --depth-min '+str(source.get('Grid').get('z'))+' --depth-max '+str(source.get('Grid').get('z2'))
-        else:
-            add_url=''
+        add_url=' --depth-min '+str(source.get('Grid').get('z',0))+' --depth-max '+str(source.get('Grid').get('z2',0))
 
         TRY=10
 
