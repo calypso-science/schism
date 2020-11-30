@@ -66,8 +66,7 @@ class download_data(object):
             ' --user '+user+' --pwd '+pwd
 
             for itry in range(0,TRY):
-                if logging:
-                    logging.info('Try #%i for %s' % (itry,var))
+                self.logger.info('Try #%i for %s' % (itry,var))
                 os.system(url)
                 if os.path.isfile(os.path.join(root,prf+'_'+t0.strftime('%Y%m%d%H%M00')+'.nc')):
                     break
