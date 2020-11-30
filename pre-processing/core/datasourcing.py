@@ -57,14 +57,16 @@ class download_data(object):
         '--date-min "'+(t0-datetime.timedelta(hours=12)).strftime('%Y-%m-%d %H:%M:00')+\
         '" --date-max "'+(t1+datetime.timedelta(hours=12)).strftime('%Y-%m-%d %H:%M:00')
 
+        var_url=''
         for var in nvar:
-            url+='" --variable '+var
+            var_url+=' --variable '+var
 
+        url+=var_url
         url+=add_url
         url+=' --out-dir '+root+\
         ' --out-name '+filename+\
         ' --user '+user+' --pwd '+pwd
-
+        print(url)
         for itry in range(0,10):
             self.logger.info('Try #%i for %s' % (itry,var))
             os.system(url)
