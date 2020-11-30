@@ -51,7 +51,7 @@ class download_data(object):
         TRY=10
 
         for var in nvar:
-            url='python -m motuclient --motu '+url+' '+\
+            url='python3 -m motuclient --motu '+url+' '+\
             '--service-id '+service+\
             ' --product-id '+product+\
             ' --longitude-min '+str(xmin)+' --longitude-max '+str(xmax)+' '+\
