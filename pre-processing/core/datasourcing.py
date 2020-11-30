@@ -56,8 +56,8 @@ class download_data(object):
             ' --product-id '+product+\
             ' --longitude-min '+str(xmin)+' --longitude-max '+str(xmax)+' '+\
             '--latitude-min '+str(ymin)+' --latitude-max '+str(ymax)+' '+\
-            '--date-min "'+t0.strftime('%Y-%m-%d %H:%M:00')+\
-            '" --date-max "'+t1.strftime('%Y-%m-%d %H:%M:00')+\
+            '--date-min "'+t0.strftime('%Y-%m-%d %H:%M:00')-datetime.timedelta(hours=12)+\
+            '" --date-max "'+t1.strftime('%Y-%m-%d %H:%M:00')+datetime.timedelta(hours=12)+\
             '" --variable '+var
 
             url+=add_url
