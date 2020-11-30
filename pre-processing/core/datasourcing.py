@@ -48,26 +48,28 @@ class download_data(object):
         root,filename=os.path.split(fileout)
         add_url=' --depth-min '+str(source.get('Grid').get('z',0))+' --depth-max '+str(source.get('Grid').get('z2',6000))
 
+
+        url='python3 -m motuclient --motu '+source.get('url')+' '+\
+        '--service-id '+service+\
+        ' --product-id '+product+\
+        ' --longitude-min '+str(xmin)+' --longitude-max '+str(xmax)+' '+\
+        '--latitude-min '+str(ymin)+' --latitude-max '+str(ymax)+' '+\
+        '--date-min "'+(t0-datetime.timedelta(hours=12)).strftime('%Y-%m-%d %H:%M:00')+\
+        '" --date-max "'+(t1+datetime.timedelta(hours=12)).strftime('%Y-%m-%d %H:%M:00')
+
         for var in nvar:
-            url='python3 -m motuclient --motu '+source.get('url')+' '+\
-            '--service-id '+service+\
-            ' --product-id '+product+\
-            ' --longitude-min '+str(xmin)+' --longitude-max '+str(xmax)+' '+\
-            '--latitude-min '+str(ymin)+' --latitude-max '+str(ymax)+' '+\
-            '--date-min "'+(t0-datetime.timedelta(hours=12)).strftime('%Y-%m-%d %H:%M:00')+\
-            '" --date-max "'+(t1+datetime.timedelta(hours=12)).strftime('%Y-%m-%d %H:%M:00')+\
-            '" --variable '+var
+            url+='" --variable '+var
 
-            url+=add_url
-            url+=' --out-dir '+root+\
-            ' --out-name '+var+'_'+t0.strftime('%Y%m%d%H%M00')+'.nc'+\
-            ' --user '+user+' --pwd '+pwd
+        url+=add_url
+        url+=' --out-dir '+root+\
+        ' --out-name '+filename+\
+        ' --user '+user+' --pwd '+pwd
 
-            for itry in range(0,10):
-                self.logger.info('Try #%i for %s' % (itry,var))
-                os.system(url)
-                if os.path.isfile(os.path.join(root,var+'_'+t0.strftime('%Y%m%d%H%M00')+'.nc')):
-                    break
+        for itry in range(0,10):
+            self.logger.info('Try #%i for %s' % (itry,var))
+            os.system(url)
+            if os.path.isfile(os.path.join(root,filename)):
+                break
 
     def download_hycom(self,fileout,source,t0,t1):
 
