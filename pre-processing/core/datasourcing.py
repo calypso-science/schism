@@ -68,7 +68,7 @@ class download_data(object):
             for itry in range(0,TRY):
                 self.logger.info('Try #%i for %s' % (itry,var))
                 os.system(url)
-                if os.path.isfile(os.path.join(root,prf+'_'+t0.strftime('%Y%m%d%H%M00')+'.nc')):
+                if os.path.isfile(os.path.join(root,var+'_'+t0.strftime('%Y%m%d%H%M00')+'.nc')):
                     break
 
     def download_hycom(self,fileout,source,t0,t1):
