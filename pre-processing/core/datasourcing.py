@@ -43,7 +43,7 @@ class download_data(object):
         pwd=source.get('pass')
         user=source.get('user')
         root,filename=os.path.split(fileout)
-        add_url=' --depth-min '+str(source.get('Grid').get('z',0))+' --depth-max '+str(source.get('Grid').get('z2',0))
+        add_url=' --depth-min '+str(source.get('Grid').get('z',0))+' --depth-max '+str(source.get('Grid').get('z2',6000))
 
         TRY=10
 
