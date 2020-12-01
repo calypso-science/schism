@@ -64,7 +64,7 @@ RUN cd /tmp &&\
     
 
 RUN pip3 install pathlib
-
+RUN pip3 install Cython
 RUN echo "-----------------Install PySCHISM -----------------" &&\
     cd /tmp &&\
     git clone https://github.com/schism-dev/pyschism &&\

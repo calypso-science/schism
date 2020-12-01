@@ -115,7 +115,7 @@ class Meteo(object):
         for section in file_sections:
 
             for k in range(0,len(unique_days)):
-                t=np.arange(unique_days[k],unique_days[k]+1-dt,dt)
+                t=np.arange(unique_days[k],unique_days[k]+1-dt,dt)+1
                 tin=[np.datetime64(num2date(x)) for x in t]
 
                

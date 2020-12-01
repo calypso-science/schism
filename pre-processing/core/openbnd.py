@@ -166,12 +166,27 @@ class OpenBoundaries(object):
                         zi=self.res_file['lev'][:].values
                         if np.mean(zi)>0:
                           zi=zi*-1
-
-                       
                         for p in range(0,tmp.shape[0]):
-                            bad=np.isnan(tmp[p,:])
-                            caca=interp1d(zi[~bad],tmp[p,~bad],fill_value="extrapolate")
-                            tb[p,:]=caca(self.zz[p,:])
+                            if self.zz.shape[1]==2: # 2D
+                                total_depth=self.zz[p,0]
+                                bad=np.isnan(tmp[p,:])
+                                depth=zi[~bad]
+                                vel=tmp[p,~bad]
+                                depth=np.insert(depth,0,0,axis=0)
+                                ve=0
+                                tot=0
+                                for dep in range(0,len(depth)-1):
+                                    dz=depth[dep]-depth[dep+1]
+                                    dx=vel[dep]
+                                    ve+=dx*dz
+                                    tot+=dz
+                                
+                                tb[p,:]=ve/np.abs(tot)
+                            else: # 3D
+                                
+                                    bad=np.isnan(tmp[p,:])
+                                    caca=interp1d(zi[~bad],tmp[p,~bad],fill_value="extrapolate")
+                                    tb[p,:]=caca(self.zz[p,:])
 
 
 

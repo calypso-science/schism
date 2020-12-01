@@ -84,6 +84,9 @@ RUN cd /usr/src/ &&\
 
 RUN pip3 install descartes
 
+RUN pip3 install motuclient
+
+
 ## TO CHANGE
 #/opt/conda/envs/schism/lib/python3.6/site-packages/pyschism/driver/driver.py
 

@@ -31,6 +31,7 @@ class download_data(object):
 
     def clean_mercator(self,filein):
         os.system("ncrename -O -d .depth,lev %s %s" %(filein, filein))
+        os.system("ncrename -O -v depth,lev %s %s" %(filein, filein))
         os.system("ncks -O --mk_rec_dmn time %s %s" %(filein, filein)) 
         os.system("ncpdq -O -U %s %s" %(filein, filein)) 
         os.system("ncatted -O -a _FillValue,,o,f,9.96920996838687e+36 %s %s" %(filein, filein))
