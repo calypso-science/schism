@@ -124,7 +124,7 @@ class Meteo(object):
                     netcdf_name=('sflux_%s_%.f.%04.f.nc' % (section,n+1,k+1))
                    
 
-                    temp,root_grp=create_netcdf_file(os.path.join(self.input_dir,netcdf_name),self.lon[n],self.lat[n],t,file_sections[section])
+                    temp,root_grp=create_netcdf_file(os.path.join(self.input_dir,netcdf_name),self.lon[n],self.lat[n],t+1,file_sections[section])
                    
                     for var in file_sections[section]:
                         if hasattr(dataset[var],'interp'):
