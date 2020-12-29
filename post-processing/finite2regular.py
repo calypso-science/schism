@@ -443,7 +443,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
 
 
     for nfile in range(INDstart,INDend+1):
-        fileIN=os.path.join(dirout,prefix+str(1)+'.nc')
+        fileIN=os.path.join(dirout,prefix+str(nfile)+'.nc')
         Z=extract_raw(fileIN,params, lim, gd,lev=levs)
         for vv in Z:
             v=vv.replace('elev','ssh')
@@ -458,10 +458,10 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
                         #     masked_vari[masked_vari<=-990.0]=1e20
                         ds[v][n,i,:,:]=masked_vari
                 else:
-                        
+                        print(n)
                         tmp=griddata(ugrid, Z[vv][n,:], rgrid, method='linear')
                         masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
-                        ds[v][n,:,:]=masked_vari
+                        ds[v][n,:,:]=34 #masked_vari
             
 
             ds[v]=ds[v][:].fillna(1e20)
