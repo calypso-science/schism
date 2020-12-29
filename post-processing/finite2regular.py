@@ -439,35 +439,36 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
 
     ds=create_dataset(Ts,unit,rloni,rlati,params,masked_vari,lev=levs)
     ds['dep']=ds['dep'][:].fillna(1e20)
+    ds.to_netcdf(fileout)
+    
 
+    # for nfile in range(INDstart,INDend+1):
+    #     fileIN=os.path.join(dirout,prefix+str(1)+'.nc')
+    #     Z=extract_raw(fileIN,params, lim, gd,lev=levs)
+    #     for vv in Z:
+    #         v=vv.replace('elev','ssh')
 
-    for nfile in range(INDstart,INDend+1):
-        fileIN=os.path.join(dirout,prefix+str(1)+'.nc')
-        Z=extract_raw(fileIN,params, lim, gd,lev=levs)
-        for vv in Z:
-            v=vv.replace('elev','ssh')
-
-            for n in range(Z[vv].shape[0]):
-                if len(Z[vv].shape)==3:
-                    for i in range(0,Z[vv].shape[1]):
-                        Z[vv][n,i,Z[vv][n,i,:]<=-990]=np.nan
-                        tmp=griddata(ugrid, Z[vv][n,i,:], rgrid, method='linear')
-                        masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
-                        # if i>2:
-                        #     masked_vari[masked_vari<=-990.0]=1e20
-                        ds[v][n,i,:,:]=masked_vari
-                else:
+    #         for n in range(Z[vv].shape[0]):
+    #             if len(Z[vv].shape)==3:
+    #                 for i in range(0,Z[vv].shape[1]):
+    #                     Z[vv][n,i,Z[vv][n,i,:]<=-990]=np.nan
+    #                     tmp=griddata(ugrid, Z[vv][n,i,:], rgrid, method='linear')
+    #                     masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
+    #                     # if i>2:
+    #                     #     masked_vari[masked_vari<=-990.0]=1e20
+    #                     ds[v][n,i,:,:]=masked_vari
+    #             else:
                         
-                        tmp=griddata(ugrid, Z[vv][n,:], rgrid, method='linear')
-                        #masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
-                        ds[v][n,:,:]=tmp#masked_vari
+    #                     tmp=griddata(ugrid, Z[vv][n,:], rgrid, method='linear')
+    #                     masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
+    #                     ds[v][n,:,:]=masked_vari
             
 
-            ds[v]=ds[v][:].fillna(1e20)
+    #         ds[v]=ds[v][:].fillna(1e20)
 
 
-    fileout=fileout.replace('.nc','')+netCDF4.num2date(Ts,unit)[0].strftime('%Y%m%d_%Hz.nc')
-    ds.to_netcdf(fileout)
+    # fileout=fileout.replace('.nc','')+netCDF4.num2date(Ts,unit)[0].strftime('%Y%m%d_%Hz.nc')
+    # ds.to_netcdf(fileout)
 
 if __name__ == "__main__":
     
