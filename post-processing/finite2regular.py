@@ -428,7 +428,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
     rloni, rlati = np.meshgrid(Mask.rgrid_lon.values, Mask.rgrid_lat.values)
     rgrid = (rloni, rlati)
 
-    Ts,X,Y,depth,gd,unit=read_initial_netcdf_file(os.path.join(dirout,prefix+str(INDstart)+'.nc'),\
+    Ts,X,Y,depth,gd,unit=read_initial_netcdf_file(os.path.join(dirout,prefix+str(INDstart+1)+'.nc'),\
                                           os.path.join(dirout,prefix+str(INDend)+'.nc'),\
                                           epsg,lim,min_depth)
 
@@ -460,7 +460,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
                         
                         tmp=griddata(ugrid, Z[vv][n,:], rgrid, method='linear')
                         masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
-                        ds[v][n,:,:]=masked_vari.T
+                        ds[v][n,:,:]=masked_vari
             
 
             ds[v]=ds[v][:].fillna(1e20)
