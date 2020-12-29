@@ -395,6 +395,7 @@ def read_initial_netcdf_file(file0,file1,epsg,lim,min_depth):
 
     return times,X,Y,depth,gd,unit
 def get_INDstart(dirout,prefix):
+    print(os.path.join(dirout,prefix+'*'))
     all_file=glob.glob(os.path.join(dirout,prefix+'*'))
     all_file=sorted(all_file)
     return int(all_file[0].split('_')[-1].replace('.nc',''))
