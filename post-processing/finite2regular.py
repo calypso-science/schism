@@ -444,6 +444,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
     for nfile in range(INDstart,INDend+1):
         fileIN=os.path.join(dirout,prefix+str(1)+'.nc')
         Z=extract_raw(fileIN,params, lim, gd,lev=levs)
+        print(Z['elev'][0])
         for vv in Z:
             v=vv.replace('elev','ssh')
 
