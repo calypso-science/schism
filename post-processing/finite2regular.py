@@ -428,7 +428,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
     rloni, rlati = np.meshgrid(Mask.rgrid_lon.values, Mask.rgrid_lat.values)
     rgrid = (rloni, rlati)
 
-    Ts,X,Y,depth,gd,unit=read_initial_netcdf_file(os.path.join(dirout,prefix+str(INDstart+1)+'.nc'),\
+    Ts,X,Y,depth,gd,unit=read_initial_netcdf_file(os.path.join(dirout,prefix+str(INDstart)+'.nc'),\
                                           os.path.join(dirout,prefix+str(INDend)+'.nc'),\
                                           epsg,lim,min_depth)
 
