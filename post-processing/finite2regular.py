@@ -459,9 +459,8 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
                 else:
                         
                         tmp=griddata(ugrid, Z[vv][n,:], rgrid, method='linear')
-                        print(tmp)
-                        masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
-                        ds[v][n,:,:]=masked_vari
+                        #masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
+                        ds[v][n,:,:]=tmp#masked_vari
             
 
             ds[v]=ds[v][:].fillna(1e20)
