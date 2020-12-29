@@ -209,9 +209,8 @@ class OpenBoundaries(object):
             if np.isnan(total).any():
                 import pdb;pdb.set_trace()  
     
-            if np.any(np.abs(total))>10:
-                import pdb;pdb.set_trace()  
-                
+
+
             if n % 100 == 0:
                 self.logger.info('For timestep=%.f, max=%.4f, min=%.4f , max abs diff=%.4f' % (TimeSeries[n],total.max(),total.min(),abs(np.diff(total,n=1,axis=0)).max()))
             
