@@ -396,7 +396,6 @@ def read_initial_netcdf_file(file0,file1,epsg,lim,min_depth):
     return times,X,Y,depth,gd,unit
 def get_INDstart(dirout,prefix):
     all_file=glob.glob(os.path.join(dirout,prefix+'*'))
-    print(all_file)
     all_file=sorted(all_file)
     return int(all_file[0].split('_')[-1].replace('.nc',''))
 
@@ -464,7 +463,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
                         ds[v][n,:,:]=masked_vari
             
 
-            ds[v]=ds[v][:].fillna(1e20)
+#            ds[v]=ds[v][:].fillna(1e20)
 
 
     fileout=fileout.replace('.nc','')+netCDF4.num2date(Ts,unit)[0].strftime('%Y%m%d_%Hz.nc')
