@@ -448,7 +448,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
         for vv in Z:
             v=vv.replace('elev','ssh')
 
-            for n in range(Z[vv].shape[0]):
+            for n in range(0,Z[vv].shape[0]):
                 if len(Z[vv].shape)==3:
                     for i in range(0,Z[vv].shape[1]):
                         Z[vv][n,i,Z[vv][n,i,:]<=-990]=np.nan
@@ -461,7 +461,6 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
                         
                         tmp=griddata(ugrid, Z[vv][n,:], rgrid, method='linear')
                         masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
-                        print(ds[v][n].shape)
                         ds[v][n,:,:]=masked_vari
             
 
