@@ -450,8 +450,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
 
             for n in range(0,Z[vv].shape[0]):
                 nn=n+(Z[vv].shape[0]*(nfile-INDstart))
-                if v=='ssh':
-                    print(nn)
+
                 if len(Z[vv].shape)==3:
                     for i in range(0,Z[vv].shape[1]):
                         Z[vv][n,i,Z[vv][n,i,:]<=-990]=np.nan
