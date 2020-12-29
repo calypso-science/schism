@@ -449,6 +449,9 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
             v=vv.replace('elev','ssh')
 
             for n in range(0,Z[vv].shape[0]):
+                nn=n+(Z[vv].shape[0]*nfile)
+                if v=='ssh':
+                    print(nn)
                 if len(Z[vv].shape)==3:
                     for i in range(0,Z[vv].shape[1]):
                         Z[vv][n,i,Z[vv][n,i,:]<=-990]=np.nan
@@ -456,12 +459,11 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
                         masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
                         # if i>2:
                         #     masked_vari[masked_vari<=-990.0]=1e20
-                        ds[v][n,i,:,:]=masked_vari
+                        ds[v][nn,i,:,:]=masked_vari
                 else:
-                        print(n)
                         tmp=griddata(ugrid, Z[vv][n,:], rgrid, method='linear')
                         masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
-                        ds[v][n,:,:]=34 #masked_vari
+                        ds[v][nn,:,:]=masked_vari
             
 
             ds[v]=ds[v][:].fillna(1e20)
