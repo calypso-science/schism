@@ -401,7 +401,10 @@ def get_INDstart(dirout,prefix):
 
 def get_INDend(dirout,prefix):
     all_file=glob.glob(os.path.join(dirout,prefix+'*'))
-    all_file=sorted(all_file)
+    #all_file=sorted(all_file)
+    import re
+    all_file=all_file.sort(key=lambda f: int(re.sub('\D', '', f)))
+
     import pdb;pdb.set_trace()
     return int(all_file[-1].split('_')[-1].replace('.nc',''))
 
