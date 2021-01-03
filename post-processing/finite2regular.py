@@ -15,6 +15,7 @@ from descartes.patch import PolygonPatch
 from shapely.ops import cascaded_union
 from shapely.geometry import Point, Polygon
 import glob
+import re
 try:
     import interpz
 except:
@@ -396,16 +397,13 @@ def read_initial_netcdf_file(file0,file1,epsg,lim,min_depth):
     return times,X,Y,depth,gd,unit
 def get_INDstart(dirout,prefix):
     all_file=glob.glob(os.path.join(dirout,prefix+'*'))
-    all_file=sorted(all_file)
+    all_file.sort(key=lambda f: int(re.sub('\D', '', f)))
     return int(all_file[0].split('_')[-1].replace('.nc',''))
 
 def get_INDend(dirout,prefix):
-    all_file=glob.glob(os.path.join(dirout,prefix+'*'))
-    #all_file=sorted(all_file)
-    import re
+    all_file=glob.glob(os.path.join(dirout,prefix+'*'))  
     all_file.sort(key=lambda f: int(re.sub('\D', '', f)))
 
-    import pdb;pdb.set_trace()
     return int(all_file[-1].split('_')[-1].replace('.nc',''))
 
 
