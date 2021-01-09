@@ -259,7 +259,7 @@ def extract_HC(consfile,Vars, lim, conlist=None,min_depth=1):
             con=con.decode('UTF-8')
             print("extracting %s for %s" %(var0, con))   
             amp =  f.variables[var0+"_amp"][ncon]
-            pha = f.variables[var0+"_amp"][ncon]
+            pha = f.variables[var0+"_pha"][ncon]
 
             if len(amp.shape)>1:
                 amp=amp[Ilev,gd]
