@@ -372,7 +372,10 @@ def read_initial_netcdf_file(file0,file1,epsg,lim,min_depth):
     Y=nc.variables['SCHISM_hgrid_node_y'][:]
     X,Y=transform(inProj,outProj,X[:],Y[:]) 
 
-    gd=(X>=lim[0]) & (X<=lim[1]) & (Y>=lim[2]) & (Y <=lim[3]) & (depth>=min_depth )
+    bufX=(lim[1]-lim[0])*5/100
+    bufY=(lim[3]-lim[2])*5/100
+
+    gd=(X>=lim[0]-bufX) & (X<=lim[1]+bufX) & (Y>=lim[2]-bufY) & (Y <=lim[3]+bufY) & (depth>=min_depth )
 
     X=X[gd]
     Y=Y[gd]
