@@ -134,8 +134,13 @@ def mask_interp(lon,lat,arr,leafsize=10, stat=1):
     yy=lat.flatten().T
     obs_data=arr.flatten()
     bad=obs_data.mask
-    obs_loc=np.vstack((xx[~bad],yy[~bad])).T
-    invdisttree = Invdisttree(obs_loc, obs_data[~bad],leafsize=leafsize, stat=stat)
+    if np.any(bad):
+        xx=xx[~bad]
+        yy=yy[~bad]
+        obs_data=obs_data[~bad]
+
+    obs_loc=np.vstack((xx,yy)).T
+    invdisttree = Invdisttree(obs_loc, obs_data,leafsize=leafsize, stat=stat)
     return invdisttree
 
 
@@ -145,16 +150,17 @@ if __name__ == "__main__":
     import netCDF4
     import numpy as np
 
-    nc=netCDF4.Dataset('/home/remy/Calypso/Projects/MarlboroughSounds/bnd/tide_otis.nc')
+    nc=netCDF4.Dataset('/home/remy/projects/013_japan/runs/run0/tide_otis.nc')
     node_xy=np.ndarray((2,2))
-    node_xy[0,:]=[174.7483,-41.22848]
-    node_xy[1,:]=[177,-38]
+    node_xy[0,:]=[1.3898687599999676E+02, 3.4657416999996343E+01]
+    node_xy[1,:]=[1.3985775499999937E+02, 3.4905425000000257E+01]
     xx,yy=np.meshgrid(nc['lon'][:],nc['lat'][:])
     xx=xx.flatten().T
     yy=yy.flatten().T
     obs_data=nc['e_amp'][0].flatten()
     bad=obs_data.mask
     obs_loc=np.vstack((xx[~bad],yy[~bad])).T
+
     invdisttree = Invdisttree(obs_loc, obs_data[~bad],leafsize=10, stat=1)
     vmap = invdisttree(node_xy, nnear=10, p=2)
 
