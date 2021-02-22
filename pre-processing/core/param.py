@@ -304,22 +304,22 @@ class ModelConfig(object):
 
     def _choose_diffusion(self):
         mode=self.userconfig['hydro'].get('mode','diffusion 1')
-        inter_mom=self.userconfig['hydro'].get('inter_mom',0)
+        inter_mom=
         if mode=='diffusion 1':
-            self.config['hydro']['inter_mom']=0
-            self.config['hydro']['ishapiro']=1
-            self.config['hydro']['ihorcon']=0
-            self.config['hydro']['indvel']=0
+            self.config['hydro']['inter_mom']=self.userconfig['hydro'].get('inter_mom',0)
+            self.config['hydro']['ishapiro']=self.userconfig['hydro'].get('ishapiro',1)
+            self.config['hydro']['ihorcon']=self.userconfig['hydro'].get('ihorcon',0)
+            self.config['hydro']['indvel']=self.userconfig['hydro'].get('indvel',0)
         elif mode=='diffusion 2':
-            self.config['hydro']['inter_mom']=inter_mom
-            self.config['hydro']['ishapiro']=0
-            self.config['hydro']['ihorcon']=0
-            self.config['hydro']['indvel']=1
+            self.config['hydro']['inter_mom']=self.userconfig['hydro'].get('inter_mom',0)
+            self.config['hydro']['ishapiro']=self.userconfig['hydro'].get('ishapiro',0)
+            self.config['hydro']['ihorcon']=self.userconfig['hydro'].get('ihorcon',0)
+            self.config['hydro']['indvel']=self.userconfig['hydro'].get('indvel',1)
         elif mode=='dispersion':
-            self.config['hydro']['inter_mom']=0
-            self.config['hydro']['ishapiro']=0
-            self.config['hydro']['ihorcon']=2
-            self.config['hydro']['indvel']=0
+            self.config['hydro']['inter_mom']=self.userconfig['hydro'].get('inter_mom',0)
+            self.config['hydro']['ishapiro']=self.userconfig['hydro'].get('ishapiro',0)
+            self.config['hydro']['ihorcon']=self.userconfig['hydro'].get('ihorcon',0)
+            self.config['hydro']['indvel']=self.userconfig['hydro'].get('indvel',0)
         else:
             print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
             print('!!!!!!!!Mode must be diffusion 1 or diffusion 2 or dispersion (eddying)!!!!!!!!!!!!!')
