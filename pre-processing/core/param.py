@@ -318,7 +318,7 @@ class ModelConfig(object):
         elif mode=='dispersion':
             self.config['hydro']['inter_mom']=0
             self.config['hydro']['ishapiro']=0
-            self.config['hydro']['ihorcon']=0
+            self.config['hydro']['ihorcon']=2
             self.config['hydro']['indvel']=0
         else:
             print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
