@@ -304,7 +304,7 @@ class ModelConfig(object):
 
     def _choose_diffusion(self):
         mode=self.userconfig['hydro'].get('mode','diffusion 1')
-        inter_mom=
+
         if mode=='diffusion 1':
             self.config['hydro']['inter_mom']=self.userconfig['hydro'].get('inter_mom',0)
             self.config['hydro']['ishapiro']=self.userconfig['hydro'].get('ishapiro',1)
