@@ -105,7 +105,7 @@ def extract_HC(modfile,Vars, lon, lat, conlist=None, logger=None):
 
     const = t_getconsts(np.array([]))
     Const= [con.decode('UTF-8') for con in const[0]['name']] 
-    consindex = [Const.index(con.ljust(4)) for con in conList]
+    consindex = [Const.index(con.ljust(4).upper()) for con in conList]
 
     tfreq = (2*np.pi)*const[0]['freq'][consindex]/3600.
 
