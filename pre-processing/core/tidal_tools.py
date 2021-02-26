@@ -31,6 +31,7 @@ from scipy.interpolate import interp1d
 def extrapolate_amp(lon,lat,lonr, latr, maskr, arr):
     arr=mask_interp(lon,lat,arr)
     arri = arr(np.vstack((lonr,latr)).T, nnear=6, p=2)
+
     bad=np.isnan(arri)
     if np.any(bad):
         import pdb;pdb.set_trace()
@@ -76,7 +77,7 @@ def extract_HC(modfile,Vars, lon, lat, conlist=None, logger=None):
 
     ###
     # Read the grid file
-    X=f.variables['lon'][:]
+    X=np.mod(f.variables['lon'][:],360)
     Y=f.variables['lat'][:]
     if len(X.shape)==1:
         X, Y = np.meshgrid(X, Y)

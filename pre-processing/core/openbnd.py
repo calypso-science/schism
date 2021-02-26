@@ -93,6 +93,7 @@ class OpenBoundaries(object):
 
         self.HC,self.tfreq,self.constidx=extract_HC(tidal['filename'],tidal['vars'],self.llon,self.llat, logger=self.logger)
         self.tidal=True
+
         if len(self.HC.keys())>1:
           self.ivs=2
 
