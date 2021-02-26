@@ -55,7 +55,7 @@
 ! Coordinate option: 1: Cartesian; 2: lon/lat (hgrid.gr3=hgrid.ll in this case,
 ! and orientation of element is outward of earth)
 !-----------------------------------------------------------------------
-  ics = 1 !Coordinate option
+  ics = ${ics} !Coordinate option
 
 !-----------------------------------------------------------------------
 ! Hotstart option. 0: cold start; 1: hotstart with time reset to 0; 2: 
@@ -235,7 +235,7 @@
 ! the latitude specified in CPP projection ('sfea0') is used. If ncor=1 and ics=2,
 ! Coriolis is calculated from local latitude, and 'sfea0' is not used.
 !-----------------------------------------------------------------------
-  ncor = 0 !should usually be 1 if ics=2
+  ncor = ${ncor} !should usually be 1 if ics=2
   rlatitude = 46 !if ncor=-1
   coricoef = 0 !1.e-4 !if ncor=0
 

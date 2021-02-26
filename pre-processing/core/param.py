@@ -79,7 +79,8 @@ class ModelConfig(object):
         ''' Docstring'''
         default={}
         if module is 'hydro':
-
+            default['ics']=1
+            default['ncor']=0
             default['ibcc']=0
             default['ibtp']=1
             default['itransport_only']=0
