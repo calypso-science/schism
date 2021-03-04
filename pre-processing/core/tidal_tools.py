@@ -101,7 +101,10 @@ def extract_HC(modfile,Vars, lon, lat, conlist=None, logger=None):
     else:
         for ncon in range(0,len(f.variables['cons'])):
             x=''
-            conList.append(''.join([x+n.decode('UTF-8') for n in f.variables['cons'][ncon].data]))
+            try:
+                conList.append(''.join([x+n.decode('UTF-8') for n in f.variables['cons'][ncon].data]))
+            except:
+                conList.append(''.join([x+n.decode('UTF-8') for n in f.variables['cons'][ncon].data]))
             conIDX.append(ncon)
 
     const = t_getconsts(np.array([]))
