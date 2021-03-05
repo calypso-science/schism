@@ -107,7 +107,7 @@ def extract_HC(modfile,Vars, lon, lat, conlist=None, logger=None):
                 conList.append(''.join([x+n for n in f.variables['cons'][ncon]]))
             conIDX.append(ncon)
 
-    import pdb;pdb.set_trace()
+
     const = t_getconsts(np.array([]))
     Const= [con.decode('UTF-8') for con in const[0]['name']] 
     consindex = [Const.index(con.ljust(4).upper()) for con in conList]
@@ -133,8 +133,8 @@ def extract_HC(modfile,Vars, lon, lat, conlist=None, logger=None):
             N=N+1
             con=con.decode('UTF-8')
             logger.info("Interpolating %s for %s" %(var0, con))        
-            var[var0][ncon,0,:] = extrapolate_amp(X, Y, lon, lat, maskr, f.variables[var0+"_amp"][ncon,:,:]) 
-            var[var0][ncon,2,:] = extrapolate_pha(X, Y, lon, lat, maskr, f.variables[var0+"_pha"][ncon,:,:])*180./np.pi
+            var[var0][N,0,:] = extrapolate_amp(X, Y, lon, lat, maskr, f.variables[var0+"_amp"][ncon,:,:]) 
+            var[var0][N,2,:] = extrapolate_pha(X, Y, lon, lat, maskr, f.variables[var0+"_pha"][ncon,:,:])*180./np.pi
 
 
 
