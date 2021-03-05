@@ -107,6 +107,7 @@ def extract_HC(modfile,Vars, lon, lat, conlist=None, logger=None):
                 conList.append(''.join([x+n for n in f.variables['cons'][ncon]]))
             conIDX.append(ncon)
 
+    import pdb;pdb.set_trace()
     const = t_getconsts(np.array([]))
     Const= [con.decode('UTF-8') for con in const[0]['name']] 
     consindex = [Const.index(con.ljust(4).upper()) for con in conList]
