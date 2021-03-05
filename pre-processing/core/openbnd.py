@@ -21,6 +21,7 @@ class OpenBoundaries(object):
         if logger:
             self.logger = logger
 
+        self.cons=obc['cons']
         self.obc=obc
         self.hgrid=hgrid
         self.vgrid=vgrid
@@ -91,7 +92,7 @@ class OpenBoundaries(object):
 
     def add_tide(self,tidal):
 
-        self.HC,self.tfreq,self.constidx=extract_HC(tidal['filename'],tidal['vars'],self.llon,self.llat, logger=self.logger)
+        self.HC,self.tfreq,self.constidx=extract_HC(tidal['filename'],tidal['vars'],self.llon,self.llat, conlist=self.cons,logger=self.logger)
         self.tidal=True
 
         if len(self.HC.keys())>1:
