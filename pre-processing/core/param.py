@@ -134,6 +134,7 @@ class ModelConfig(object):
             default['kr_co']=1
             default['ielm_transport']=0
             default['max_subcyc']=10
+            default['mxitn0']=1500
 
             default['itr_met']=3
             default['h_tvd']=5
