@@ -21,7 +21,7 @@ class OpenBoundaries(object):
         if logger:
             self.logger = logger
 
-        self.cons=obc['cons']
+        self.cons=obc.get('cons',None)
         self.obc=obc
         self.hgrid=hgrid
         self.vgrid=vgrid
