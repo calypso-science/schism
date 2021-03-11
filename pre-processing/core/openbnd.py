@@ -154,7 +154,7 @@ class OpenBoundaries(object):
                     arri=self.res_file[v][:]
                     
                     arri_time=arri.interp(time=tin[n])
-                    
+                    import pdb;pdb.set_trace()
                     if self.i23d >2:
                         tb=np.ndarray((len(self.llon),Nlev))
                         tmp=np.ndarray((len(self.llon),arri_time.shape[0]))*np.nan
