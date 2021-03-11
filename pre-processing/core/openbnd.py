@@ -152,7 +152,7 @@ class OpenBoundaries(object):
 
                 for i,v in enumerate(sorted(var)):
                     arri=self.res_file[v][:]
-                    
+                    import pdb;pdb.set_trace()
                     arri_time=arri.interp(time=tin[n])
 
                     if self.i23d >2:
