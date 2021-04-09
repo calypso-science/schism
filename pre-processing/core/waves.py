@@ -5,10 +5,12 @@ from io import StringIO
 from mako import exceptions
 import ast
 from matplotlib.dates import date2num
+import numpy as np
+import os
 
 class Wave(object):
     
-    def __init__(self, hgrid,hydro,t0,t1,
+    def __init__(self,rootdir, hgrid,hydro,t0,t1,
         logger=None):
         '''Constructor'''
 
@@ -19,14 +21,33 @@ class Wave(object):
         self.config={}
         self.userconfig={}
         self.userconfig['hydro'] = hydro
-       
+        self.path=rootdir
 
+    def _make_bnd(self):
+        values=np.zeros((len(self.hgrid.hgrid.x)))
+        for bnd in self.hgrid.mesh.boundaries[None]:
+            tmp=self.hgrid.mesh.boundaries[None][bnd]['indexes']
+            tmp=[int(y)-1 for y in tmp]
+            values[tmp]=2
+
+
+        hgridWWM=copy.deepcopy(self.hgrid.mesh)
+        hgridWWM.values[:]=values
+        hgridWWM.write(os.path.join(self.path,'wwmbnd.gr3'))
+
+    def _make_grid(self):
+        hgridWWM=copy.deepcopy(self.hgrid.mesh)
+        hgridWWM.write(os.path.join(self.path,'hgrid_WWM.gr3'))
+        
     def make_wave(self):
         '''Docstring''' 
-
-        self.logger.info("\tWriting:%s" %'hgrid_WWM.gr3')
-        import pdb;pdb.set_trace()
-        self.logger.info("\tWriting:%s" %'wwmbnd.gr3')
+        if not os.path.isfile(os.path.join(self.path,'hgrid_WWM.gr3')):
+            self.logger.info("\tWriting:%s" %'hgrid_WWM.gr3')
+            self._make_grid()
+            
+        if not os.path.isfile(os.path.join(self.path,'wwmbnd.gr3')):
+            self.logger.info("\tWriting:%s" %'wwmbnd.gr3')
+            self._make_bnd()
 
         # cmdblank = Template(filename=cmdfile,input_encoding='utf-8',output_encoding='utf-8')
         # buf = StringIO()
