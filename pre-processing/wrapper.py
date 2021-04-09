@@ -43,6 +43,7 @@ class SCHISM():
 
     def __init__(self, rootdir, hydro_config,vgrid_config,obc,param_tmp,exec_bin,
                  hgrid_file,timing,input_files=None,forcings=None,ic=None,meteo=None,stations=None,
+                 wave=None,
                  indir=None,
                  logdir=None,
                  errors=None,
@@ -56,6 +57,7 @@ class SCHISM():
         self.input_files = input_files
         self.forcings= forcings
         self.meteo=meteo
+        self.wave=wave
         self.obc  = obc
         self.timing= timing
         self.ic=ic
@@ -147,8 +149,9 @@ class SCHISM():
         # #----------------------- Set Boundary Conditions (bctides.in) -----------
         # # Store boundary arrays in each obc bctype object (Ex: self.obc['btype']['7']['iettype'])
         #t0+(t1-t0)/2 mid run ????
-        bcinput = BCinputs(obc=self.obc,hgrid=self.hgrid, lat0=lat0,t0=t0, logger=self.logger)
-        bcinput.make_bctides(join(self.rootdir,'bctides.in'))
+        if not os.path.isfile(join(self.rootdir,'bctides.in')):
+            bcinput = BCinputs(obc=self.obc,hgrid=self.hgrid, lat0=lat0,t0=t0, logger=self.logger)
+            bcinput.make_bctides(join(self.rootdir,'bctides.in'))
 
        #  # ------------------- Create Ocean boundary forcing -----------------
         if self.forcings:
@@ -208,7 +211,7 @@ class SCHISM():
 
         # ------------------- Create Wave boundary forcing -----------------
         if self.wave:
-            wave = Waves(hgrid=self.hgrid,hydro=self.hydro_config,t0=t0,t1=t1, logger=self.logger)
+            wave = Waves(hgrid=self.hgrid,hydro=self.wave,t0=t0,t1=t1, logger=self.logger)
             wave.make_waves()
         
 
