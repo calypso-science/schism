@@ -26,6 +26,7 @@ from meteo import Meteo
 from ic import InitialConditions
 from atmospheric import get_convergence
 from station import Station
+import pdb;pdb.set_trace()
 from wave import Wave
 
 logging.basicConfig(filename=None,
