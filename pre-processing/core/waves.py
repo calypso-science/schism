@@ -8,14 +8,14 @@ from matplotlib.dates import date2num
 
 class Wave(object):
     
-    def __init__(self, grid,hydro,t0,t1,
+    def __init__(self, hgrid,hydro,t0,t1,
         logger=None):
         '''Constructor'''
 
         if logger:
             self.logger = logger
             
-
+        self.hgrid=hgrid
         self.config={}
         self.userconfig={}
         self.userconfig['hydro'] = hydro
