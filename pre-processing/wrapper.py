@@ -26,6 +26,7 @@ from meteo import Meteo
 from ic import InitialConditions
 from atmospheric import get_convergence
 from station import Station
+from wave import Wave
 
 logging.basicConfig(filename=None,
                     filemode='w',
@@ -206,7 +207,7 @@ class SCHISM():
 
         # ------------------- Create Wave boundary forcing -----------------
         if self.wave:
-            wave = Waves(nest=self.nest, logger=self.logger)
+            wave = Waves(hgrid=self.hgrid,hydro=self.hydro_config,t0=t0,t1=t1, logger=self.logger)
             wave.make_waves()
         
 
