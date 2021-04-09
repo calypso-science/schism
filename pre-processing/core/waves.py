@@ -10,7 +10,7 @@ import os
 
 class Wave(object):
     
-    def __init__(self,rootdir, hgrid,hydro,t0,t1,
+    def __init__(self,root, hgrid,hydro,t0,t1,
         logger=None):
         '''Constructor'''
 
@@ -21,7 +21,7 @@ class Wave(object):
         self.config={}
         self.userconfig={}
         self.userconfig['hydro'] = hydro
-        self.path=rootdir
+        self.path=root
 
     def _make_bnd(self):
         values=np.zeros((len(self.hgrid.hgrid.x)))
@@ -44,7 +44,7 @@ class Wave(object):
         if not os.path.isfile(os.path.join(self.path,'hgrid_WWM.gr3')):
             self.logger.info("\tWriting:%s" %'hgrid_WWM.gr3')
             self._make_grid()
-            
+
         if not os.path.isfile(os.path.join(self.path,'wwmbnd.gr3')):
             self.logger.info("\tWriting:%s" %'wwmbnd.gr3')
             self._make_bnd()
