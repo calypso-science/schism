@@ -212,7 +212,7 @@ class SCHISM():
         # ------------------- Create Wave boundary forcing -----------------
         if self.wave:
             wave = Wave(hgrid=self.hgrid,hydro=self.wave,t0=t0,t1=t1, logger=self.logger)
-            wave.make_waves()
+            wave.make_wave()
         
 
 def load_action(yfile):
