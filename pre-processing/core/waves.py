@@ -32,7 +32,7 @@ class Wave(object):
 
 
         hgridWWM=copy.deepcopy(self.hgrid.mesh)
-        hgridWWM.values[:]=values
+        hgridWWM.values[:]=values*-1
         hgridWWM.write(os.path.join(self.path,'wwmbnd.gr3'))
 
     def _make_grid(self):
