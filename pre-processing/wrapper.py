@@ -144,8 +144,8 @@ class SCHISM():
 
         # #----------------------- Set Boundary Conditions (bctides.in) -----------
         # # Store boundary arrays in each obc bctype object (Ex: self.obc['btype']['7']['iettype'])
-        
-        bcinput = BCinputs(obc=self.obc,hgrid=self.hgrid, lat0=lat0,t0=t0+(t1-t0)/2, logger=self.logger)
+        #t0+(t1-t0)/2 mid run ????
+        bcinput = BCinputs(obc=self.obc,hgrid=self.hgrid, lat0=lat0,t0=t0, logger=self.logger)
         bcinput.make_bctides(join(self.rootdir,'bctides.in'))
 
        #  # ------------------- Create Ocean boundary forcing -----------------
@@ -204,10 +204,10 @@ class SCHISM():
 
           st.write_station()
 
-       #  # ------------------- Create Wave boundary forcing -----------------
-       #  if self.nest.wave:
-       #      wave = Waves(nest=self.nest, logger=self.logger)
-       #      wave.make_waves()
+        # ------------------- Create Wave boundary forcing -----------------
+        if self.wave:
+            wave = Waves(nest=self.nest, logger=self.logger)
+            wave.make_waves()
         
 
 def load_action(yfile):

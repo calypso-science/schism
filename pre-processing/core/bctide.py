@@ -123,7 +123,7 @@ class BCinputs(object):
 
 
     
-    def _write_iettype(self,btypes,iettype):
+    def _write_iettype(self,btypes,iettype,iecons):
             
 
             ## TAKE CARE OF iettype
@@ -132,35 +132,35 @@ class BCinputs(object):
                 self.bctides.write("%.2f\n" % (ethconst)) 
 
             elif iettype==3 or iettype==5: #forced in frequency domain
-                for cons in self.iecons.keys():
+                for cons in iecons.keys():
                   self.bctides.write("%s\n" % (cons))
-                  keys=self.iecons[cons].items()
+                  keys=iecons[cons].items()
                   eamp=[ k for k,v in keys if 'amp' in k][0]
                   epha=[ k for k,v in keys if 'pha' in k][0]
 
-                  for n in range(0,len(self.iecons[cons][eamp])):
-                    self.bctides.write("%.4f %.4f\n" % (self.iecons[cons][eamp][n],self.iecons[cons][epha][n]))
+                  for n in range(0,len(iecons[cons][eamp])):
+                    self.bctides.write("%.4f %.4f\n" % (iecons[cons][eamp][n],iecons[cons][epha][n]))
 
 
-    def _write_ifltype(self,btypes,ifltype):
+    def _write_ifltype(self,btypes,ifltype,ifcons):
 
             ## TAKE CARE OF ifltype
         if ifltype==2: #forced in frequency domain
             const=btypes['ifltype']['const']
             self.bctides.write("%.4f\n" % (const))
         elif ifltype==3 or ifltype==5: #this boundary is forced by a constant elevatio
-            for cons in self.ifcons.keys():
+            for cons in ifcons.keys():
               self.bctides.write("%s\n" % (cons))
-              keys=self.ifcons[cons].items()
+              keys=ifcons[cons].items()
               uamp=[ k for k,v in keys if 'amp' in k and 'u' in k][0]
               upha=[ k for k,v in keys if 'pha' in k and 'u' in k][0]
               vamp=[ k for k,v in keys if 'amp' in k and 'v' in k][0]
               vpha=[ k for k,v in keys if 'pha' in k and 'v' in k][0]
-              for n in range(0,len(self.ifcons[cons][uamp])):
-                self.bctides.write("%.4f %.4f %.4f %.4f\n" % (self.ifcons[cons][uamp][n],\
-                                                              self.ifcons[cons][upha][n],\
-                                                              self.ifcons[cons][vamp][n],\
-                                                              self.ifcons[cons][vpha][n]))
+              for n in range(0,len(ifcons[cons][uamp])):
+                self.bctides.write("%.4f %.4f %.4f %.4f\n" % (ifcons[cons][uamp][n],\
+                                                              ifcons[cons][upha][n],\
+                                                              ifcons[cons][vamp][n],\
+                                                              ifcons[cons][vpha][n]))
         elif ifltype==-4: #time history of velocity 
             inflow = btypes['ifltype']['inflow']
             outflow = btypes['ifltype']['outflow']
@@ -329,7 +329,8 @@ class BCinputs(object):
             ifltype = btypes[k]['ifltype']['value']
             itetype = btypes[k]['itetype']['value']
             isatype = btypes[k]['isatype']['value']
-
+            iecons  = self.iecons[k]
+            ifcons  = self.ifcons[k]
             
             self.bctides.write("%.f %.f %.f %.f %.f" % (len(self.nnode[k]),iettype,ifltype,itetype,isatype))
             ## add the tracers
@@ -342,8 +343,8 @@ class BCinputs(object):
             self.bctides.write("\n" )
 
 
-            self._write_iettype(btypes[k],iettype)
-            self._write_ifltype(btypes[k],ifltype)
+            self._write_iettype(btypes[k],iettype,iecons)
+            self._write_ifltype(btypes[k],ifltype,ifcons)
 
 
             self._write_tracers(btypes[k],'itetype',itetype) # temperature
@@ -385,16 +386,17 @@ class BCinputs(object):
         if (3 in iet) or (5 in iet):
           self.get_e_cons(btypes)
           
-
         if (3 in ifl) or (5 in ifl):
           self.get_uv_cons(btypes)
 
         self._write_bctides(filename,tpalpha,tpspec,tpamp,tpfreq,tpear,tpnf,talpha, tfreq, tear, tnf)
 
     def get_e_cons(self,btypes):
-          Lat=[]
-          Lon=[]  
-          for b in range(0,len(btypes)):
+        self.iecons={} 
+        for b in range(0,len(btypes)):
+            self.iecons[b]={}
+            Lat=[]
+            Lon=[]           
             if (btypes[b]['iettype']['value']==3) or (btypes[b]['iettype']['value']==5):
               file=btypes[b]['iettype']['filename']
               var=btypes[b]['iettype']['vars']
@@ -404,38 +406,40 @@ class BCinputs(object):
                 Lon.append(self.hgrid.longitude[int(node_i)])
           
               
-          HC,tfreq,constidx=extract_HC(file,var,Lon,Lat, logger=self.logger)
-          const = t_getconsts(np.array([]))
-          self.iecons={}
-          
-          for i,n in enumerate(constidx):
-            self.iecons[const[0]['name'][n].decode('UTF-8')]={}
-            for k in HC.keys():
-              k=k.split('_')[0]
-              self.iecons[const[0]['name'][n].decode('UTF-8')][k+'_amp']=HC[k][i,0,:]
-              self.iecons[const[0]['name'][n].decode('UTF-8')][k+'_pha']=np.mod(HC[k][i,2,:],360)
+            HC,tfreq,constidx=extract_HC(file,var,Lon,Lat, logger=self.logger)
+            const = t_getconsts(np.array([]))
+            
+            
+            for i,n in enumerate(constidx):
+              self.iecons[b][const[0]['name'][n].decode('UTF-8')]={}
+              for k in HC.keys():
+                k=k.split('_')[0]
+                self.iecons[b][const[0]['name'][n].decode('UTF-8')][k+'_amp']=HC[k][i,0,:]
+                self.iecons[b][const[0]['name'][n].decode('UTF-8')][k+'_pha']=np.mod(HC[k][i,2,:],360)
 
 
     def get_uv_cons(self,btypes):
+      self.ifcons={}
+      for b in range(0,len(btypes)):
           Lat=[]
           Lon=[]  
-          for b in range(0,len(btypes)):
-            if (btypes[b]['ifltype']['value']==3) or (btypes[b]['ifltype']['value']==5):
-              file=btypes[b]['ifltype']['filename']
-              var=btypes[b]['ifltype']['vars']
-           
-              for node_i in self.nnode[b]:
-                Lat.append(self.hgrid.latitude[int(node_i)])
-                Lon.append(self.hgrid.longitude[int(node_i)])
-          
+          self.ifcons[b]={}
+          if (btypes[b]['ifltype']['value']==3) or (btypes[b]['ifltype']['value']==5):
+            file=btypes[b]['ifltype']['filename']
+            var=btypes[b]['ifltype']['vars']
+         
+            for node_i in self.nnode[b]:
+              Lat.append(self.hgrid.latitude[int(node_i)])
+              Lon.append(self.hgrid.longitude[int(node_i)])
+        
               
           HC,tfreq,constidx=extract_HC(file,var,Lon,Lat, logger=self.logger)
           const = t_getconsts(np.array([]))
-          self.ifcons={}
+
           
           for i,n in enumerate(constidx):
-            self.ifcons[const[0]['name'][n].decode('UTF-8')]={}
+            self.ifcons[b][const[0]['name'][n].decode('UTF-8')]={}
             for k in var:
               k=k.split('_')[0]
-              self.ifcons[const[0]['name'][n].decode('UTF-8')][k+'_amp']=HC[k][i,0,:]
-              self.ifcons[const[0]['name'][n].decode('UTF-8')][k+'_pha']=np.mod(HC[k][i,2,:],360)
+              self.ifcons[b][const[0]['name'][n].decode('UTF-8')][k+'_amp']=HC[k][i,0,:]
+              self.ifcons[b][const[0]['name'][n].decode('UTF-8')][k+'_pha']=np.mod(HC[k][i,2,:],360)
