@@ -6,7 +6,7 @@ from mako import exceptions
 import ast
 from matplotlib.dates import date2num
 import numpy as np
-import os
+import os,copy
 
 class Wave(object):
     
