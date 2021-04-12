@@ -150,7 +150,7 @@ class SCHISM():
         # # Store boundary arrays in each obc bctype object (Ex: self.obc['btype']['7']['iettype'])
         #t0+(t1-t0)/2 mid run ????
         if not os.path.isfile(join(self.rootdir,'bctides.in')):
-            bcinput = BCinputs(obc=self.obc,hgrid=self.hgrid, lat0=lat0,t0=t0, logger=self.logger)
+            bcinput = BCinputs(obc=self.obc,hgrid=self.hgrid, lat0=lat0,t0=t0,t0ref=t0+(t1-t0)/2 ,logger=self.logger)
             bcinput.make_bctides(join(self.rootdir,'bctides.in'))
 
        #  # ------------------- Create Ocean boundary forcing -----------------

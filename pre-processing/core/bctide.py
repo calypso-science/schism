@@ -45,7 +45,7 @@ def t_equilib(freq,doodsonamp,doodsonspecies,lat0):
   return amp
    
 
-def Calculate(lat, t0, cons,typ=0):
+def Calculate(lat, t0,tref, cons,typ=0):
 
     const = t_getconsts(np.array([]))
     Const= [con.decode('UTF-8') for con in const[0]['name']] 
@@ -53,9 +53,14 @@ def Calculate(lat, t0, cons,typ=0):
 
     consindex = [Const.index(con.ljust(4)) for con in cons]
 
-    # V: astronomical phase, U: nodal phase modulation, F: nodal amplitude correction
-    v,u,f = t_vuf('nodal', np.array(t0), consindex, lat)
-    tear = 360.*(v+u)
+    # Earth equilibrium at the beginning of the run
+    [v,u,_]=t_vuf('nodal',np.array(t0),consindex, lat);
+    tear=360.*(v+u);
+
+    # Nodel factor at the middl of the run
+    [_,_,f]=t_vuf('nodal',np.array(tref),consindex, lat);
+    tnf=f;
+
     tfreq = (2*np.pi)*const[0]['freq'][consindex]/3600.
     talpha = const[0]['name'][consindex]
 
@@ -96,7 +101,7 @@ class BCinputs(object):
     Class that manages input file generation for a model simulation.
     """
 
-    def __init__(self,obc,hgrid,lat0,t0, logger=None):
+    def __init__(self,obc,hgrid,lat0,t0,t0ref, logger=None):
         '''Docstring'''  
 
         if logger:
@@ -105,6 +110,7 @@ class BCinputs(object):
         self.lat0 = lat0
         self.t0= t0
         self.t0dec=date2num(t0)
+        self.t0refdec=date2num(t0ref)
         self.obc=obc
         self.hgrid=hgrid
         self.nnode=hgrid.nnode
@@ -376,9 +382,9 @@ class BCinputs(object):
             self.logger.info("  Writing %s" %filename)
 
 
-        talpha, tfreq, tear, tnf = Calculate(self.lat0, self.t0dec, self.obc['cons'].split(' '))
+        talpha, tfreq, tear, tnf = Calculate(self.lat0, self.t0dec,self.t0refdec, self.obc['cons'].split(' '))
         if 'tp cons' in self.obc:
-          tpalpha,tpspec,tpamp, tpfreq, tpear, tpnf = Calculate(self.lat0, self.t0dec, self.obc['tp cons'].split(' '),1)
+          tpalpha,tpspec,tpamp, tpfreq, tpear, tpnf = Calculate(self.lat0, self.t0dec,self.t0refdec, self.obc['tp cons'].split(' '),1)
         else:
           tpalpha=[]
           tpspec=[]
