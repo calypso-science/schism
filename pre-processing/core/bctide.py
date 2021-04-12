@@ -108,6 +108,8 @@ class BCinputs(object):
         self.obc=obc
         self.hgrid=hgrid
         self.nnode=hgrid.nnode
+        self.iecons=False
+        self.ifcons=False
 
 
 
@@ -329,8 +331,16 @@ class BCinputs(object):
             ifltype = btypes[k]['ifltype']['value']
             itetype = btypes[k]['itetype']['value']
             isatype = btypes[k]['isatype']['value']
-            iecons  = self.iecons[k]
-            ifcons  = self.ifcons[k]
+
+            if self.iecons:
+              iecons  = self.iecons[k]
+            else:
+              iecons=False
+
+            if self.ifcons:
+              ifcons  = self.ifcons[k]
+            else:
+              ifcons=False
             
             self.bctides.write("%.f %.f %.f %.f %.f" % (len(self.nnode[k]),iettype,ifltype,itetype,isatype))
             ## add the tracers
