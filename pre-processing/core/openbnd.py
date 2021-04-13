@@ -257,6 +257,8 @@ class OpenBoundaries(object):
                     v=options[n+1]['Y']
                     y=nc[v][:]
                     x=[date2num(x) for x in X]
+                    x=np.array(x)
+                    y=np.array(y)
 
 
 
