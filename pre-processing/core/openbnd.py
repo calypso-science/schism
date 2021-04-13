@@ -6,6 +6,7 @@ from res_tools import get_file_interpolator,vertical_extrapolation
 from filetype import create_ncTH
 import xarray as xr
 from interp2D import mask_interp
+import netCDF4
 # import cdms2
 # from vcmq import fill2d,grid2xy,griddata,create_time,create_depth,create_axis,MV2,N
 import scipy.io
@@ -245,10 +246,20 @@ class OpenBoundaries(object):
 
         for n in range(0,len(options)):
             if 'filename' in options[n+1]:
-                mat = scipy.io.loadmat(options[n+1]['filename'])
-                x=mat[options[n+1]['X']]-366
-                y=mat[options[n+1]['Y']].flatten(1)
+                if '.mat' in options[n+1]['filename']:
+                    mat = scipy.io.loadmat(options[n+1]['filename'])
+                    x=mat[options[n+1]['X']]-366
+                    y=mat[options[n+1]['Y']].flatten(1)
                 
+                elif '.nc' in options[n+1]['filename']:
+                    nc=netCDF4.Dataset(options[n+1]['filename'])
+                    X=netCDF4.num2date(nc['time'][:],nc['time'].units)
+                    v=options[n+1]['Y']
+                    y=nc[v][:]
+                    x=[date2num(x) for x in X]
+
+
+
                 if np.mean(y)>=0 and fileout[-5:]=='ux.th':
                     y=y*-1
 
