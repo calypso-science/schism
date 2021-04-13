@@ -269,7 +269,7 @@ class OpenBoundaries(object):
                     fac=options[n+1]['fac']
                     y=y+(y*(fac/100.0))
             
-                y2 = interp1d(x.flatten(1), y, kind='linear')
+                y2 = interp1d(x.flatten(), y, kind='linear')
                 Y[:,n+1]=y2(TimeSeries)
                 fmt=fmt+'%.4f   '
             elif type(options[n+1]['Y'])==type(list()):
