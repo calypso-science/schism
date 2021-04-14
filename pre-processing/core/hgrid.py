@@ -35,8 +35,10 @@ class HorizontalGrid(BaseIO):
             
         # ----------------------------------------------------------- grid properties -----------       
         self.hgrid = self.load(epsg)
-        import pdb;pdb.set_trace()
-        self.mesh = self.hgrid
+
+        for n in range(0,len(self.hgrid.elements):
+            if self.hgrid.elements[m][-1]==0:
+                del self.hgrid.elements[n][-1]
 
         self.nopen = len(self.mesh.boundaries[None]) # number of open boundaries segments    
         self.nnode = [self.mesh.boundaries[None][bnd]['indexes'] for bnd in self.mesh.boundaries[None]]
