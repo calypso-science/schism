@@ -31,6 +31,8 @@ def create_ncTH(filename,Nnode,Nlev,Nvar,T):
 		time.long_name="simulation time in days"
 		time_series = nc.createVariable('tracer_concentration', 'f4', ('time','node','nVert','ntracers'))
 		time[:]=T/86400.0
+		imap = nc.createVariable('map_to_global_node','i4',('node'))
+		imap[:]=1
 
 	return time_series,nc
 
