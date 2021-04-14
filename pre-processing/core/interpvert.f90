@@ -34,7 +34,7 @@ subroutine interpz1d(varin, zin, zout, np, nzin, nzout, kz, null_value, varout)
 
       ! interpolate z
       if (zout(i) < zin(i,kz)) then ! zout below bathymetry
-        ! do nothing
+        varout(i,nzout) = varin(i,kz)
       elseif (zout(i) >= zin(i,nzin)) then
         varout(i,nzout) = varin(i,nzin)
       else
