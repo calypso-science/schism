@@ -187,10 +187,10 @@ class OpenBoundaries(object):
                                 
                                 tb[p,:]=ve/np.abs(tot)
                         else: # 3D
-                            bad=np.isnan(tmp[p,:])
-                            varin=np.flipud(tmp[:,~bad])
-                            zin=zi[~bad]
-                            zin=np.flipud(np.matlib.repmat(zin,varin.shape[0],1))
+                            #bad=np.isnan(tmp[0,:])
+                            varin=np.flipud(tmp)#[:,~bad])
+                            #zin=zi[~bad]
+                            zin=np.flipud(np.matlib.repmat(zi,varin.shape[0],1))
 
                             for nl in range(0,self.zz.shape[1]):
                                 zout=self.zz[:,nl]
