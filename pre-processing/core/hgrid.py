@@ -39,7 +39,9 @@ class HorizontalGrid(BaseIO):
         for n in range(0,len(self.hgrid.elements)):
             if self.hgrid.elements[n][-1]==0:
                 del self.hgrid.elements[n][-1]
+                print('gone')
 
+        print(self.hgrid.elements[n])
         self.mesh=self.hgrid
         self.nopen = len(self.mesh.boundaries[None]) # number of open boundaries segments    
         self.nnode = [self.mesh.boundaries[None][bnd]['indexes'] for bnd in self.mesh.boundaries[None]]
