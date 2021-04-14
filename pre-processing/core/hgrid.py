@@ -49,6 +49,9 @@ class HorizontalGrid(BaseIO):
         if epsg == WGS84:
             self.longitude = self.mesh.x
             self.latitude = self.mesh.y
+            if not os.path.isfile(self.path_ll):
+                self.logger.info('\tCreating: %s' % (self.path_gr3[:-3]+'ll'))
+                self.mesh.write(self.path_gr3[:-3]+'ll')
         else:
             self.path_ll=self.path_gr3[:-3]+'ll'
             self.longitude = self.mesh.get_x(crs="EPSG:%i"%WGS84)
