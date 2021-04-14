@@ -38,7 +38,7 @@ subroutine interpz1d(varin, zin, zout, np, nzin, nzout, kz, null_value, varout)
       elseif (zout(i) >= zin(i,nzin)) then
         !if (debug .and. i==debug_node) write(*,*) 'getting surface!'
         write(*,*) 'getting surface!'
-        varout(i,i) = varin(i,nzin)
+        varout(i,nzout) = varin(i,nzin)
       else
 
         ! interp1d
@@ -50,9 +50,8 @@ subroutine interpz1d(varin, zin, zout, np, nzin, nzout, kz, null_value, varout)
           endif
         enddo !k
 
-
         rat = (zout(i)-zin(i,k0)) / (zin(i,k0+1)-zin(i,k0))
-        varout(i,i) = varin(i,k0)*(1.-rat)+varin(i,k0+1)*rat
+        varout(i,nzout) = varin(i,k0)*(1.-rat)+varin(i,k0+1)*rat
 
       endif
 
