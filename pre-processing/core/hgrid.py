@@ -37,6 +37,7 @@ class HorizontalGrid(BaseIO):
         self.hgrid = self.load(epsg)
 
         for n in range(0,len(self.hgrid.elements)):
+            print('gone')
             if self.hgrid.elements[n][-1]==0:
                 del self.hgrid.elements[n][-1]
                 print('gone')
