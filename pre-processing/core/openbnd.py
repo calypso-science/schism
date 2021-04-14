@@ -191,7 +191,7 @@ class OpenBoundaries(object):
                                     caca=interp1d(zi[~bad],tmp[p,~bad],fill_value="extrapolate")
                                     tb[p,:]=caca(self.zz[p,:])
 
-
+                        import pdb;pdb.set_trace()
 
                     else:    
                         arr=mask_interp(xx,yy,arri_time.to_masked_array())
