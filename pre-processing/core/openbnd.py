@@ -154,7 +154,7 @@ class OpenBoundaries(object):
                 for i,v in enumerate(sorted(var)):
                     arri=self.res_file[v][:]
 
-                    arri_time=arri.interp(time=num2date(date2num(tin[n])).strftime('%Y-%m-%d %H:%M:%S'))
+                    arri_time=arri.interp(time=num2date(date2num(tin[n])).strftime('%Y-%m-%d %H:%M:%S'),method='nearest')
 
                     if self.i23d >2:
                         tb=np.ndarray((len(self.llon),Nlev))
