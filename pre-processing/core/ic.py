@@ -84,7 +84,7 @@ class InitialConditions(object):
 
         time0=netCDF4.num2date(data['time'][:],data['time'].units)
         #time0=[np.datetime64(x) for x in time0]
-        import pdb;pdb.set_trace()
+      
         geo_idx = (np.abs(date2num(time0)-date2num(self.t0))).argmin() # closest timestep
 
         varin=data[var][geo_idx]
