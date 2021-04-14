@@ -169,7 +169,7 @@ class OpenBoundaries(object):
                         zi=self.res_file['lev'][:].values
                         if np.mean(zi)>0:
                           zi=zi*-1
-                        for p in range(0,20):#tmp.shape[0]):
+                        for p in range(0,tmp.shape[0]):
                             if self.zz.shape[1]==2: # 2D
                                 total_depth=self.zz[p,0]
                                 bad=np.isnan(tmp[p,:])
@@ -195,15 +195,13 @@ class OpenBoundaries(object):
 
                         import numpy.matlib
                         varin=tmp[:,~bad]
-                        zin=zi[~bad]
-                        npin=varin.shape[0]
-                        zin=np.matlib.repmat(zin,npin,1)
                         zout=self.zz
-                        
-                        nzin=varin.shape[1]
-                        nzout=self.zz.shape[1]
+                        zin=zi[~bad]
+                        zin=np.matlib.repmat(zin,varin.shape[0],1)
+
+
                         import pdb;pdb.set_trace()
-                        EE=interpz.interpz1d(e2,z2,lev2,np=e2.shape[0],nzin=e2.shape[1],nzout=len(lev2),kz=1, null_value=-9.9e15)
+                        EE=interpz.interpz1d(varin,zin,zout[:,0],np=varin.shape[0],nzin=varin.shape[1],nzout=1,kz=1, null_value=-9.9e15)
                         
 
                     else:    
