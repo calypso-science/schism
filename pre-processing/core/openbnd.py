@@ -159,7 +159,7 @@ class OpenBoundaries(object):
                 for i,v in enumerate(sorted(var)):
                     arri=self.res_file[v][:]
                     arri_time=arri.interp(time=num2date(date2num(tin[n])).strftime('%Y-%m-%d %H:%M:%S'),method='nearest')
-                    import pdb;pdb.set_trace()
+                    
                     if self.i23d >2:
                         tb=np.ndarray((len(self.llon),Nlev))
                         tmp=np.ndarray((len(self.llon),arri_time.shape[0]))*np.nan
@@ -167,7 +167,7 @@ class OpenBoundaries(object):
                             if np.any(arri_time[nlev].to_masked_array()):
                                 arr=mask_interp(xx,yy,arri_time[nlev].to_masked_array())
                                 if len(arr.z)>6:
-                                    tmp[:,nlev]=arr(np.vstack((self.llon,self.llat)).T, nnear=6, p=2)
+                                    tmp[:,nlev]=arr(np.vstack((self.llon,self.llat)).T, nnear=1, p=2)
 
 
                         if self.zz.shape[1]==2: # 2D
