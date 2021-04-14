@@ -196,9 +196,10 @@ class OpenBoundaries(object):
                         import numpy.matlib
                         varin=tmp[:,~bad]
                         zin=zi[~bad]
+                        npin=varin.shape[0]
                         zin=np.matlib.repmat(zin,npin,1)
                         zout=self.zz
-                        npin=varin.shape[0]
+                        
                         nzin=varin.shape[1]
                         nzout=self.zz.shape[1]
                         import pdb;pdb.set_trace()
