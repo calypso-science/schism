@@ -45,7 +45,7 @@ def vertical_extrapolation(u,dep,lev=[],z0=[]):
 				iz=zinterp1d(-lev[:], dep[n,:], varout).squeeze()
 				
 			zu[n,:] = iz
-		import pdb;pdb.set_trace()
+		
 	bad=dep==-999
 	zu[bad]=-999	
 	return zu
