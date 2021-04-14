@@ -11,7 +11,7 @@ import netCDF4
 # from vcmq import fill2d,grid2xy,griddata,create_time,create_depth,create_axis,MV2,N
 import scipy.io
 from scipy.interpolate import griddata,interp1d
-
+import interpvert
 import time
 
 
@@ -169,7 +169,7 @@ class OpenBoundaries(object):
                         zi=self.res_file['lev'][:].values
                         if np.mean(zi)>0:
                           zi=zi*-1
-                        for p in range(0,tmp.shape[0]):
+                        for p in range(0,20):#tmp.shape[0]):
                             if self.zz.shape[1]==2: # 2D
                                 total_depth=self.zz[p,0]
                                 bad=np.isnan(tmp[p,:])
