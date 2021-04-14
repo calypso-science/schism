@@ -71,8 +71,9 @@ class InitialConditions(object):
     def _create_nc_gr3(self,ncfile,var):
         data=netCDF4.Dataset(ncfile)
             # Read the grid file
-        X=data.variables['lon'][:]
-        Y=data.variables['lat'][:]
+
+        X=data.variables['longitude'][:]
+        Y=data.variables['latitude'][:]
         if len(X.shape)==1:
             xx, yy = np.meshgrid(X, Y)
 
