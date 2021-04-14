@@ -194,7 +194,7 @@ class OpenBoundaries(object):
 
                             for nl in range(0,self.zz.shape[1]):
                                 zout=self.zz[:,nl]
-                                tb[:,nl]=interpvert.interpz1d(varin,zin,zout,np=varin.shape[0],nzin=varin.shape[1],nzout=1,kz=1, null_value=-9.9e15)
+                                tb[:,nl]=np.squeeze(interpvert.interpz1d(varin,zin,zout,np=varin.shape[0],nzin=varin.shape[1],nzout=1,kz=1, null_value=-9.9e15))
 
 
                     else:    
