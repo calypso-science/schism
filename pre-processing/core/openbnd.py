@@ -188,6 +188,7 @@ class OpenBoundaries(object):
                                 tb[p,:]=ve/np.abs(tot)
                         else: # 3D
                             #bad=np.isnan(tmp[0,:])
+                            import pdb;pdb.set_trace()
                             varin=np.flipud(tmp)#[:,~bad])
                             #zin=zi[~bad]
                             zin=np.flipud(np.matlib.repmat(zi,varin.shape[0],1))
