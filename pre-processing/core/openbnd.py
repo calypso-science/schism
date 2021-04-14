@@ -191,7 +191,19 @@ class OpenBoundaries(object):
                                     caca=interp1d(zi[~bad],tmp[p,~bad],fill_value="extrapolate")
                                     tb[p,:]=caca(self.zz[p,:])
 
+
+
+                        import numpy.matlib
+                        varin=tmp[:,~bad]
+                        zin=zi[~bad]
+                        zin=np.matlib.repmat(zin,npin,1)
+                        zout=self.zz
+                        npin=varin.shape[0]
+                        nzin=varin.shape[1]
+                        nzout=self.zz.shape[1]
                         import pdb;pdb.set_trace()
+                        EE=interpz.interpz1d(e2,z2,lev2,np=e2.shape[0],nzin=e2.shape[1],nzout=len(lev2),kz=1, null_value=-9.9e15)
+                        
 
                     else:    
                         arr=mask_interp(xx,yy,arri_time.to_masked_array())
