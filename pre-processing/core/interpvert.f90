@@ -36,8 +36,6 @@ subroutine interpz1d(varin, zin, zout, np, nzin, nzout, kz, null_value, varout)
       if (zout(i) < zin(i,kz)) then ! zout below bathymetry
         ! do nothing
       elseif (zout(i) >= zin(i,nzin)) then
-        !if (debug .and. i==debug_node) write(*,*) 'getting surface!'
-        write(*,*) 'getting surface!'
         varout(i,nzout) = varin(i,nzin)
       else
 

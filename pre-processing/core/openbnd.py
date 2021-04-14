@@ -13,7 +13,7 @@ import scipy.io
 from scipy.interpolate import griddata,interp1d
 import interpvert
 import time
-
+import numpy.matlib
 
 class OpenBoundaries(object):
     def __init__(self,obc,hgrid,vgrid,t0,t1,z0=0.001,logger=None):
@@ -169,8 +169,9 @@ class OpenBoundaries(object):
                         zi=self.res_file['lev'][:].values
                         if np.mean(zi)>0:
                           zi=zi*-1
-                        for p in range(0,tmp.shape[0]):
-                            if self.zz.shape[1]==2: # 2D
+
+                        if self.zz.shape[1]==2: # 2D
+                            for p in range(0,tmp.shape[0]):
                                 total_depth=self.zz[p,0]
                                 bad=np.isnan(tmp[p,:])
                                 depth=zi[~bad]
@@ -185,24 +186,16 @@ class OpenBoundaries(object):
                                     tot+=dz
                                 
                                 tb[p,:]=ve/np.abs(tot)
-                            else: # 3D
-                                
-                                    bad=np.isnan(tmp[p,:])
-                                    caca=interp1d(zi[~bad],tmp[p,~bad],fill_value="extrapolate")
-                                    tb[p,:]=caca(self.zz[p,:])
+                        else: # 3D
+                            bad=np.isnan(tmp[p,:])
+                            varin=np.flipud(tmp[:,~bad])
+                            zin=zi[~bad]
+                            zin=np.flipud(np.matlib.repmat(zin,varin.shape[0],1))
 
+                            for nl in range(0,self.zz.shape[1]):
+                                zout=self.zz[:,nl]
+                                tb[:,nl]=interpvert.interpz1d(varin,zin,zout,np=varin.shape[0],nzin=varin.shape[1],nzout=1,kz=1, null_value=-9.9e15)
 
-
-                        import numpy.matlib
-                        varin=tmp[:,~bad]
-                        zout=self.zz
-                        zin=zi[~bad]
-                        zin=np.matlib.repmat(zin,varin.shape[0],1)
-
-
-                        import pdb;pdb.set_trace()
-                        EE=interpz.interpz1d(varin,zin,zout[:,0],np=varin.shape[0],nzin=varin.shape[1],nzout=1,kz=1, null_value=-9.9e15)
-                        
 
                     else:    
                         arr=mask_interp(xx,yy,arri_time.to_masked_array())
