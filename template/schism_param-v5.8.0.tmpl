@@ -268,8 +268,8 @@
 ! If ihot=0 && flag_ic(1:2)=2 || ibcc_mean=1, ts.ic is used for removing mean density profile.
 ! flag_ic(1) must =flag_ic(2)
 !-----------------------------------------------------------------------
-  flag_ic(1) = 1 !T
-  flag_ic(2) = 1 !S
+  flag_ic(1) = ${flag_ic_temp} !T
+  flag_ic(2) = ${flag_ic_salt} !S
 
 ! initial conditions for other tracers.
 ! 1: needs inputs [MOD]_hvar_[1,2,...].ic ('1...' is tracer id); format of each file is similar to salt.ic;

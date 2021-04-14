@@ -188,6 +188,8 @@ class ModelConfig(object):
             default['AGE_1']="'0'" #
 
             default['flag_ic_gen']=0 #EN (user defined module)
+            default['flag_ic_salt']=0
+            default['flag_ic_temp']=1
             #default['flag_ic_age']=0 #Age
       
             default['flag_ic_timor']=0 #TIMOR
