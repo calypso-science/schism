@@ -150,12 +150,18 @@ class OpenBoundaries(object):
             if self.residual:
                 
                 var=self.res_vars
+                if self.i23d >2:
+                    zi=self.res_file['lev'][:].values
+                    if np.mean(zi)>0:
+                      zi=zi*-1
+
 
                 for i,v in enumerate(sorted(var)):
+                    print('0')
                     arri=self.res_file[v][:]
-
+                    print('1')
                     arri_time=arri.interp(time=num2date(date2num(tin[n])).strftime('%Y-%m-%d %H:%M:%S'),method='nearest')
-
+                    print('2')
                     if self.i23d >2:
                         tb=np.ndarray((len(self.llon),Nlev))
                         tmp=np.ndarray((len(self.llon),arri_time.shape[0]))*np.nan
@@ -165,10 +171,6 @@ class OpenBoundaries(object):
                                 if len(arr.z)>6:
                                     tmp[:,nlev]=arr(np.vstack((self.llon,self.llat)).T, nnear=6, p=2)
 
-
-                        zi=self.res_file['lev'][:].values
-                        if np.mean(zi)>0:
-                          zi=zi*-1
 
                         if self.zz.shape[1]==2: # 2D
                             for p in range(0,tmp.shape[0]):
