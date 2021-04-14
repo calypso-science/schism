@@ -196,6 +196,10 @@ class ModelConfig(object):
             default['inu_tr_s']=0 #S
             default['inu_tr_gen']=0 #GEN
             default['inu_tr_age']=0 #Age
+            default['vnf2']=0
+            default['vnf1']=0
+            default['vnh1']=0
+            default['vnh2']=500
             
             default['inu_tr_timor']=0 #TIMOR 
             default['inu_tr_fabm']=0 #FABM 

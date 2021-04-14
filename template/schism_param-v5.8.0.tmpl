@@ -499,10 +499,10 @@ gen_wsett = ${gen_wsett}
   inu_tr(12) = 0 !DVD (must=0)
 
 
-  vnh1 = 400 !vertical nudging depth 1
-  vnf1 = 0. !vertical relax \in [0,1]
-  vnh2 = 500 !vertical nudging depth 2 (must >vnh1)
-  vnf2 = 0. !vertical relax
+  vnh1 = ${vnh1} !vertical nudging depth 1
+  vnf1 = ${vnf1} !vertical relax \in [0,1]
+  vnh2 = ${vnh2} !vertical nudging depth 2 (must >vnh1)
+  vnf2 = ${vnf2} !vertical relax
 
   step_nu_tr = ${step_nu_tr} !time step [sec] in all [MOD]_nu.nc (for inu_[MOD]=2)
 
