@@ -86,7 +86,7 @@ class InitialConditions(object):
         #time0=[np.datetime64(x) for x in time0]
 
         geo_idx = (np.abs(date2num(time0)-date2num(self.t0))).argmin() # closest timestep
-        import pdb;pdb.set_trace()
+       
         varin=data[var][geo_idx]
         if len(varin.shape)>2:
             varin=varin[0] # get surface level
