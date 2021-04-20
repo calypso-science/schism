@@ -206,6 +206,7 @@ class ModelConfig(object):
             default['inu_tr_timor']=0 #TIMOR 
             default['inu_tr_fabm']=0 #FABM 
             default['icou_elfe_wwm']=0 #
+            default['nstep_wwm']=1
             default['iwbl']=0 #
             default['hmin_radstress']=1 #
             default['turbinj']=0.15 #']=0 #

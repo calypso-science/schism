@@ -3,6 +3,7 @@ import datetime
 import get_opendap
 import glob
 import copy
+import xarray as xr
 
 
 def daterange(tstart, tend, delta=86400,typ='seconds'):
@@ -28,6 +29,57 @@ class download_data(object):
 
         self.t0=t0
         self.t1=t1
+
+    def clean_pw(self,filein):
+        os.system('mv %s %s' % (filein,filein+'.grb'))
+        ds=xr.open_dataset(filein+'.grb', engine="cfgrib")
+        ds.to_netcdf(filein)
+        os.system("ncks -O -C -x -v step %s %s"%(filein, filein))
+        os.system("ncks -O -C -x -v time %s %s"%(filein, filein))
+        os.system("ncrename -O -v valid_time,time %s %s"%(filein, filein))
+
+#        os.system("ncks -O --mk_rec_dmn time %s %s" %(filein, filein)) 
+        os.system("ncpdq -O -U %s %s" %(filein, filein)) 
+        os.system("rm %s" %(filein+'.grb*'))
+
+        #os.system("ncatted -O -a _FillValue,,o,f,9.96920996838687e+36 %s %s" %(filein, filein))
+    def download_pw(self,fileout,source,t0,t1):
+
+        url='wget -O '+fileout+' "'+source.get('url')
+
+
+        url+='username='+source.get('user')
+        url+='&password='+source.get('pass')
+        url+='&nlat='+str(source.get('Grid')['y2'])
+        url+='&slat='+str(source.get('Grid')['y'])
+        url+='&elon='+str(source.get('Grid')['x2'])
+        url+='&wlon='+str(source.get('Grid')['x'])
+        url+='&time=5'
+        url+='&time='+str(source.get('dt'))
+        nvar=copy.deepcopy(source.get('vars'))
+        url+='&variables='
+        varname=[]
+        if 'u10' in nvar:
+            varname.append('wind')
+        if 'msl' in nvar:
+            varname.append('pressure')
+
+
+        for var in varname:
+            url+=var+','
+
+        url=url[:-1]
+        url+='&model='+source.get('product')
+        url+='&res='+str(source.get('Grid')['dx'])
+
+        url+='"'
+        print(url)
+        root,filename=os.path.split(fileout)
+        for itry in range(0,10):
+            self.logger.info('Try #%i for %s' % (itry,var))
+            os.system(url)
+            if os.path.isfile(os.path.join(root,filename)):
+                break
 
     def clean_mercator(self,filein):
         os.system("ncrename -O -d .depth,lev %s %s" %(filein, filein))
@@ -107,6 +159,8 @@ class download_data(object):
 
         if filetype=='tide':
             os.system("mv %s %s" % (filelist[0],mergefile))
+        elif fileid=='predictwind':
+            os.system("mv %s %s" % (filelist[0],mergefile))
         else:
             os.system("ncrcat --fl_fmt=classic %s %s" %(file_tmp, mergefile))
             os.system("ncks -O --no_rec_dmn time %s %s" %(mergefile, mergefile))
@@ -157,6 +211,10 @@ class download_data(object):
 
         # Download as daily file
         days = daterange(self.t0, self.t1+ datetime.timedelta(days=1))
+        if self.t1>datetime.datetime.now():
+            self.logger.info('  FORECAST')
+            days = daterange(self.t0, self.t0+ datetime.timedelta(days=1))
+
         date_str=[]
         for day in days[:-1]:
             self.logger.info( " Sourcing data for %s-%s-%s" %(day.year, day.month, day.day))
@@ -176,14 +234,18 @@ class download_data(object):
             if source['id'].lower()=='hycom':
                 self.download_hycom(filetmp,source,day,tend)
                 self.clean_hycom(filetmp)
-            if source['id'].lower()=='mercator':
+            elif source['id'].lower()=='mercator':
                 self.download_mercator(filetmp,source,day,tend)
                 self.clean_mercator(filetmp)
+            elif source['id'].lower()=='predictwind':
+                self.download_pw(filetmp,source,day,tend)
+                self.clean_pw(filetmp)                
             elif source['id'].lower()=='uds':
                 self.download_uds(filetmp,source,day,tend)
                 self.clean_uds(filetmp)
                 if source.get('type','')=='tide':
                     break
+
             else:
                 self.logger.info('  Source not understood')
 

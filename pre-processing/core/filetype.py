@@ -36,22 +36,22 @@ def create_ncTH(filename,Nnode,Nlev,Nvar,T):
 
 	return time_series,nc
 
-def create_hotstartNC(hot,filename):
+def create_hotstartNC(filename,ntracer,np,ne,ns,nvrt):
 	nc = Dataset(filename, 'w', format='NETCDF4',clobber=True)
 	# dimensions
-	ntracer=hot['tr_nd'].shape[0]
-	nc.createDimension('node', hot['np'] )
-	nc.createDimension('elem', hot['ne'])
-	nc.createDimension('side', hot['ns'])
-	nc.createDimension('nVert', hot['nvrt'])
+	#ntracer=hot['tr_nd'].shape[0]
+	nc.createDimension('node',np)# hot['np'] )
+	nc.createDimension('elem',ne)# hot['ne'])
+	nc.createDimension('side',ns)# hot['ns'])
+	nc.createDimension('nVert',nvrt)# hot['nvrt'])
 	nc.createDimension('ntracers',ntracer)
 	nc.createDimension('one', 1)
 	nc.createDimension('three', 3)
 
-	if 'SED_Nbed' in hot:
-		nc.createDimension('SED_Nbed', hot['SED_Nbed'])
-		nc.createDimension('SED_MBEDP', hot['SED_MBEDP'])
-		nc.createDimension('SED_ntr', hot['SED_ntr'])
+	# if 'SED_Nbed' in hot:
+	# 	nc.createDimension('SED_Nbed', hot['SED_Nbed'])
+	# 	nc.createDimension('SED_MBEDP', hot['SED_MBEDP'])
+	# 	nc.createDimension('SED_ntr', hot['SED_ntr'])
 
 	var={}
 
@@ -75,20 +75,24 @@ def create_hotstartNC(hot,filename):
 	var['dfq1'] = nc.createVariable('dfq1', 'f8', ('node','nVert')) # diffmin
 	var['dfq2'] = nc.createVariable('dfq2', 'f8', ('node','nVert')) #diffmax
 
-	if 'SED_Nbed' in hot:
-		var['SED3D_dp'] = nc.createVariable('SED3D_dp', 'f8', ('node')) #dp
-		var['SED3D_rough'] = nc.createVariable('SED3D_rough', 'f8', ('node')) #rough
-		var['SED3D_bed'] = nc.createVariable('SED3D_bed', 'f8', ('elem','SED_Nbed','SED_MBEDP')) #property
-		var['SED3D_bedfrac'] = nc.createVariable('SED3D_bedfrac', 'f8', ('elem','SED_Nbed','SED_ntr')) #fraction
-
-
 	for key in var.keys():
-		Z=hot.get(key,'0')
-		if type(Z)!=type(int()):
-			try:
-				Z=Z.T
-			except:
-				import pdb;pdb.set_trace()
-		var[key][:]=Z
+		var[key][:]=0.0
 
-	nc.close()
+	return var,nc
+	# if 'SED_Nbed' in hot:
+	# 	var['SED3D_dp'] = nc.createVariable('SED3D_dp', 'f8', ('node')) #dp
+	# 	var['SED3D_rough'] = nc.createVariable('SED3D_rough', 'f8', ('node')) #rough
+	# 	var['SED3D_bed'] = nc.createVariable('SED3D_bed', 'f8', ('elem','SED_Nbed','SED_MBEDP')) #property
+	# 	var['SED3D_bedfrac'] = nc.createVariable('SED3D_bedfrac', 'f8', ('elem','SED_Nbed','SED_ntr')) #fraction
+
+
+	# for key in var.keys():
+	# 	Z=hot.get(key,'0')
+	# 	if type(Z)!=type(int()):
+	# 		try:
+	# 			Z=Z.T
+	# 		except:
+	# 			import pdb;pdb.set_trace()
+	# 	var[key][:]=Z
+
+	# nc.close()

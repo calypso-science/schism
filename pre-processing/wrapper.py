@@ -26,6 +26,7 @@ from meteo import Meteo
 from ic import InitialConditions
 from atmospheric import get_convergence
 from station import Station
+from hotstart import HotStart
 
 from waves import Wave
 
@@ -41,9 +42,9 @@ class SCHISM():
     This is the wrapper for preparing and setting up SCHISM.
     '''
 
-    def __init__(self, rootdir, hydro_config,vgrid_config,obc,param_tmp,exec_bin,
+    def __init__(self, rootdir, hydro_config,vgrid_config,obc,param_tmp,wave_tmp,exec_bin,
                  hgrid_file,timing,input_files=None,forcings=None,ic=None,meteo=None,stations=None,
-                 wave=None,
+                 wave=None,hotstart=None,
                  indir=None,
                  logdir=None,
                  errors=None,
@@ -62,6 +63,7 @@ class SCHISM():
         self.timing= timing
         self.ic=ic
         self.stations=stations
+        self.hotstart=hotstart
 
         # ----------------------------------------------------- Run paramterss -----------
         self.outdir = join(self.rootdir, 'outputs')
@@ -70,6 +72,7 @@ class SCHISM():
 
         #------------------------------------------------------- Model environment ---------
         self.param_tmp = param_tmp
+        self.wave_tmp =wave_tmp
         self.exe_dirs = exec_bin
         self.hfile= hgrid_file
         self.epsg=epsg
@@ -175,13 +178,18 @@ class SCHISM():
                  ic = InitialConditions(filename,hgrid=self.hgrid,t0=t0,value=self.ic[key].get('value',None),\
                   ncfile=self.ic[key].get('filename',None),\
                   var=self.ic[key].get('var',None),\
-                  shapefile=self.ic[key].get('shapefile',None),logger=self.logger)
+                  shapefile=self.ic[key].get('shapefile',None),
+                  strength=self.ic[key].get('strength',None),
+                  bnd=self.ic[key].get('bnd',None),
+                  distance=self.ic[key].get('distance',None),
+                  logger=self.logger)
 
 
 
        # #------------------------- Check/Prepare for hotstart --------------------
-       #  self.hot = HotStart(nest=self.nest, logger=self.logger)
-       #  self.hot.set_hotstart()
+        if self.hotstart and not os.path.isfile(os.path.join(self.rootdir,'hotstart.in1')):
+          hot = HotStart(os.path.join(self.rootdir,'hotstart.nc'),config=self.hotstart,hgrid=self.hgrid,vgrid=self.vgrid,t0=t0, logger=self.logger)
+          hot.set_hotstart()
 
 
         # ------------------- Create Atmospheric forcing --------------------
@@ -211,8 +219,12 @@ class SCHISM():
 
         # ------------------- Create Wave boundary forcing -----------------
         if self.wave:
-            wave = Wave(root=self.rootdir,hgrid=self.hgrid,hydro=self.wave,t0=t0,t1=t1, logger=self.logger)
-            wave.make_wave()
+
+            h0=cfg.config['hydro']['h0']
+            deltc=cfg.config['hydro']['dt']*cfg.config['hydro']['nstep_wwm']
+            wave = Wave(root=self.rootdir,hgrid=self.hgrid,wwm=self.wave['config'],t0=t0,t1=t1,deltc=0,h0=0, logger=self.logger)
+            wave.make_wave(self.wave_tmp,os.path.join(self.rootdir,'wwminput.nml'))
+            wave.make_forcing(self.wave['config'].get('FILEWAVE','bndfiles.dat'),ww3=self.wave.get('ww3',None))
         
 
 def load_action(yfile):

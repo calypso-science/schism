@@ -140,7 +140,7 @@
 ! Note that all these parameters must be present in this file (even though not used).
 !-----------------------------------------------------------------------
   icou_elfe_wwm = ${icou_elfe_wwm} 
-  nstep_wwm = 1  !call WWM every this many time steps. If /=1, consider using quasi-steady mode in WWM
+  nstep_wwm = ${nstep_wwm}  !call WWM every this many time steps. If /=1, consider using quasi-steady mode in WWM
   iwbl = ${iwbl} !wave boundary layer formulation (used only if USE_WMM and 
            !icou_elfe_wwm/=0 and nchi=1. If icou_elfe_wwm=0, set iwbl=0): 
            !1-modified Grant-Madsen formulation; 2-Soulsby (1997)
