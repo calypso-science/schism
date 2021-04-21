@@ -69,6 +69,7 @@ class InitialConditions(object):
 
 
         rnu_max=1./strength/86400.
+        import pdb;pdb.set_trace()
         self.hgrid.values[gd_node]=(1-(dist[gd_node]/distance))*rnu_max
 
         self.hgrid.write(self.fileout)
