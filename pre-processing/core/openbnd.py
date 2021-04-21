@@ -41,12 +41,47 @@ class OpenBoundaries(object):
         self.lat0=np.mean(self.hgrid.latitude)
 
         bnd=obc.get('bnd',None)
-        if bnd: 
+        if obc.get('distance',None):
+            self.llat,self.llon,self.zz,self.gd_nodes=self.get_nodes_distances(bnd,obc.get('distance',None))
+            self.zz=np.array(self.zz)  
+        elif bnd: 
             self.llat,self.llon,self.zz=self.get_all_open_bnd(bnd)
-            self.zz=np.array(self.zz)
+            self.zz=np.array(self.zz)          
         else:
             self.llat,self.llon,self.zz=self.get_all_nodes()
             self.zz=np.array(self.zz)
+
+    def get_nodes_distances(self,bnds,distance):
+
+        if  type(bnds[0])==str:
+            bnds=[int(x) for x in bnds[0].split()]
+
+        bnd_nodes=[self.hgrid.mesh.boundaries[None][bnd]['indexes'] for bnd in self.hgrid.mesh.boundaries[None]]
+        node_to_take=[]
+        for x in bnds:
+            node_to_take+=[int(y)-1 for y in bnd_nodes[x-1]]
+
+        # self.hgrid.values[:]=0
+        lons=self.hgrid.mesh.x
+        lats=self.hgrid.mesh.y
+        
+        dist=np.ones((len(lons),))*np.inf
+        for node in node_to_take:
+            xs=np.abs(lons-self.hgrid.mesh.x[node])
+            ys=np.abs(lats-self.hgrid.mesh.y[node])
+            ds=np.sqrt(xs**2+ys**2)
+            dist=np.minimum(ds,dist)
+
+        gd_node=dist<distance
+        Lat_ocean=self.hgrid.latitude[gd_node]
+        Lon_ocean=self.hgrid.longitude[gd_node]
+        Zlayer_ocean=[]
+        gd_node_id=np.nonzero(gd_node)[0]
+        for node_i in gd_node_id:
+            Zlayer_ocean.append(self.vgrid.sigma_to_zlayer(node_i,self.hgrid.h[node_i]*-1,0.,0.1))
+
+
+        return Lat_ocean,Lon_ocean,Zlayer_ocean,gd_node
 
     def get_all_nodes(self):
         Lat_ocean=[]
@@ -125,13 +160,23 @@ class OpenBoundaries(object):
         else:
             Nlev=1
 
-        time_Series,nc=create_ncTH(fileout,len(self.llon),Nlev,self.ivs,np.round((TimeSeries-TimeSeries[0])*24*3600))
 
+        if '_nu.nc' in fileout:
+            nnodes=len(self.hgrid.mesh.x)
+        else:
+            nnodes=len(self.llon)
+
+        time_Series,nc=create_ncTH(fileout,nnodes,Nlev,self.ivs,np.round((TimeSeries-TimeSeries[0])*24*3600))
+        
+        # if '_nu.nc' not in fileout:
+        #     nnodes=len(self.hgrid.mesh.x)
+        # else:
+        nnodes=len(self.llon)
 
 
         for n in range(0,len(TimeSeries)):
 
-            total=np.zeros(shape=(self.ivs,len(self.llon),Nlev))
+            total=np.zeros(shape=(self.ivs,nnodes,Nlev))
 
             # get tide
             if self.tidal:
@@ -161,8 +206,8 @@ class OpenBoundaries(object):
                     arri_time=arri.interp(time=num2date(date2num(tin[n])).strftime('%Y-%m-%d %H:%M:%S'))
                     
                     if self.i23d >2:
-                        tb=np.ndarray((len(self.llon),Nlev))
-                        tmp=np.ndarray((len(self.llon),arri_time.shape[0]))*np.nan
+                        tb=np.ndarray((nnodes,Nlev))
+                        tmp=np.ndarray((nnodes,arri_time.shape[0]))*np.nan
                         for nlev in range(0,arri_time.shape[0]):
                             if np.any(arri_time[nlev].to_masked_array()):
                                 arr=mask_interp(xx,yy,arri_time[nlev].to_masked_array())
@@ -207,7 +252,7 @@ class OpenBoundaries(object):
                         print('probleme')
 
 
-                    total[i,:,:]=total[i,:,:]+np.reshape(tb,(len(self.llon),Nlev))
+                    total[i,:,:]=total[i,:,:]+np.reshape(tb,(nnodes,Nlev))
 
 
 
@@ -221,9 +266,11 @@ class OpenBoundaries(object):
 
             if n % 100 == 0:
                 self.logger.info('For timestep=%.f, max=%.4f, min=%.4f , max abs diff=%.4f' % (TimeSeries[n],total.max(),total.min(),abs(np.diff(total,n=1,axis=0)).max()))
-            
-            time_Series[n,:,:,:]=total
-
+            if '_nu.nc' in fileout:
+                time_Series[n,self.gd_nodes,:,:]=total
+                time_Series[n,~self.gd_nodes,:,:]=-9999
+            else:
+                time_Series[n,:,:,:]=total
         nc.close()
 
     def create_th(self,fileout,TimeSeries,options):

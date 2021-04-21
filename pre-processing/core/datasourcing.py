@@ -4,7 +4,7 @@ import get_opendap
 import glob
 import copy
 import xarray as xr
-
+import cdsapi
 
 def daterange(tstart, tend, delta=86400,typ='seconds'):
     days = []
@@ -125,6 +125,42 @@ class download_data(object):
             os.system(url)
             if os.path.isfile(os.path.join(root,filename)):
                 break
+    def download_ecmwf(self,fileout,source,t0,t1):
+        c = cdsapi.Client()
+
+        service=source.get('service')
+        product=source.get('product')
+        xmin=source.get('Grid')['x']
+        xmax=source.get('Grid')['x2']
+        ymin=source.get('Grid')['y']
+        ymax=source.get('Grid')['y2']
+        nvar=source.get('vars')
+
+        dwnl_opt={}
+        dwnl_opt['product_type']=product
+        dwnl_opt['variable']=nvar
+        dwnl_opt['format']= 'netcdf'
+        dwnl_opt['year']=t0.strftime('%Y')
+        dwnl_opt['month']=t0.strftime('%m')
+        dwnl_opt['day']=t0.strftime('%d')
+        dwnl_opt['time']=[
+            '00:00', '01:00', '02:00',
+            '03:00', '04:00', '05:00',
+            '06:00', '07:00', '08:00',
+            '09:00', '10:00', '11:00',
+            '12:00', '13:00', '14:00',
+            '15:00', '16:00', '17:00',
+            '18:00', '19:00', '20:00',
+            '21:00', '22:00', '23:00',
+        ]
+        dwnl_opt['area']=[source.get('Grid')['y2'],source.get('Grid')['x'],source.get('Grid')['y'],source.get('Grid')['x2']]
+        
+        c.retrieve(service,dwnl_opt,fileout)
+    def clean_ecmwf(self,filein):
+
+        os.system("ncks -O --mk_rec_dmn time %s %s" %(filein, filein)) 
+        os.system("ncpdq -O -U %s %s" %(filein, filein)) 
+        os.system("ncatted -O -a _FillValue,,o,f,9.96920996838687e+36 %s %s" %(filein, filein))
 
     def download_hycom(self,fileout,source,t0,t1):
 
@@ -237,6 +273,9 @@ class download_data(object):
             elif source['id'].lower()=='mercator':
                 self.download_mercator(filetmp,source,day,tend)
                 self.clean_mercator(filetmp)
+            elif source['id'].lower()=='ecmwf':
+                self.download_ecmwf(filetmp,source,day,tend)
+                self.clean_ecmwf(filetmp)
             elif source['id'].lower()=='predictwind':
                 self.download_pw(filetmp,source,day,tend)
                 self.clean_pw(filetmp)                

@@ -2,7 +2,7 @@
 import copy
 import numpy as np
 import netCDF4
-
+import numpy.matlib
 from interp2D import mask_interp
 #from vacumm.misc.grid.regridding import fill2d
 #from vcmq import create_time,grid2xy,extend2d
@@ -13,7 +13,7 @@ from matplotlib.path import Path
 
 class InitialConditions(object):
 
-    def __init__(self,fileout,hgrid,t0,value=None,shapefile=None,ncfile=None,var=None, logger=None):
+    def __init__(self,fileout,hgrid,t0,value=None,shapefile=None,ncfile=None,var=None,bnd=None,distance=None,strength=None, logger=None):
         """ Constructor"""
 
         if logger:
@@ -34,12 +34,45 @@ class InitialConditions(object):
             self._create_nc_gr3(ncfile,var)
         elif shapefile:
             self._create_shp_gr3(shapefile,value)
+        elif strength:
+            self._create_dist_from_bnd_gr3(distance,bnd,strength)
         else:
             if fileout.endswith('.prop'):
                self._create_constante_prop(value)
             else:
                self._create_constante_gr3(value)
 
+    def _create_dist_from_bnd_gr3(self,distance,bnds,strength):
+        self.hgrid.values[:]=0
+        lon=self.hgrid.longitude
+        lat=self.hgrid.latitude
+        
+        bnd_nodes=[self.hgrid.boundaries[None][bnd]['indexes'] for bnd in self.hgrid.boundaries[None]]
+
+        node_to_take=[]
+        for x in bnds:
+            node_to_take+=[int(y)-1 for y in bnd_nodes[x-1]]
+
+
+        lons=self.hgrid.x
+        lats=self.hgrid.y
+
+        dist=np.ones((len(lons),))*np.inf
+        for node in node_to_take:
+            xs=np.abs(lons-self.hgrid.x[node])
+            ys=np.abs(lats-self.hgrid.y[node])
+            ds=np.sqrt(xs**2+ys**2)
+            dist=np.minimum(ds,dist)
+
+
+        gd_node=dist<distance
+
+
+        rnu_max=1./strength/86400.
+        self.hgrid.values[gd_node]=(1-(dist[gd_node]/distance))*rnu_max
+
+        self.hgrid.write(self.fileout)
+        self.logger.info("  %s exported"%self.fileout)
 
     def _create_constante_prop(self,value):
 
