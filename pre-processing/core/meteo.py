@@ -98,6 +98,7 @@ class Meteo(object):
 
 
         self.dataset.append(var)
+        import pdb;pdb.set_trace()
         [lon,lat]=np.meshgrid(data[lon_name][:],data[lat_name][:])
         self.lon.append(lon)
         self.lat.append(lat)
