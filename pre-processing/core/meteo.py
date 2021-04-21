@@ -98,8 +98,14 @@ class Meteo(object):
 
 
         self.dataset.append(var)
-        import pdb;pdb.set_trace()
-        [lon,lat]=np.meshgrid(data[lon_name][:],data[lat_name][:])
+
+        if data[lat_name][0]>data[lat_name][-1]:
+            self.need_sorting=True
+            [lon,lat]=np.meshgrid(data[lon_name][:],np.sort(data[lat_name][:]))
+        else:
+            self.need_sorting=False
+            [lon,lat]=np.meshgrid(data[lon_name][:],np.sort(data[lat_name][:]))
+
         self.lon.append(lon)
         self.lat.append(lat)
 
@@ -139,6 +145,7 @@ class Meteo(object):
 
 
                             for nn in range(0,tmp.shape[0]):
+                                import pdb;pdb.set_trace()
                                 temp[var][nn,:,:]=tmp[nn,:,:]
                         else:
                             temp[var][nn,:,:]=dataset[var]
