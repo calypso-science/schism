@@ -142,10 +142,11 @@ class Meteo(object):
                            	  stmp=tmp
                             if self.rh2m and var is 'spfh':
                               tmp=rh2sh(tmp/100.,prmsl,stmp)
-
+                            
+                            if self.need_sorting:
+                                tmp=tmp[:,::-1,:]
 
                             for nn in range(0,tmp.shape[0]):
-                                import pdb;pdb.set_trace()
                                 temp[var][nn,:,:]=tmp[nn,:,:]
                         else:
                             temp[var][nn,:,:]=dataset[var]
