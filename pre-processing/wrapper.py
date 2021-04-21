@@ -187,7 +187,7 @@ class SCHISM():
 
 
        # #------------------------- Check/Prepare for hotstart --------------------
-        if self.hotstart and not os.path.isfile(os.path.join(self.rootdir,'hotstart.in1')):
+        if self.hotstart and not os.path.isfile(os.path.join(self.rootdir,'hotstart.nc')):
           hot = HotStart(os.path.join(self.rootdir,'hotstart.nc'),config=self.hotstart,hgrid=self.hgrid,vgrid=self.vgrid,t0=t0, logger=self.logger)
           hot.set_hotstart()
 
