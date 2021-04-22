@@ -228,6 +228,10 @@ class SCHISM():
             wave.make_forcing(self.wave['config'].get('FILEWAVE','bndfiles.dat'),ww3=self.wave.get('ww3',None))
         
 
+
+        self.logger.info('FINISHED')
+
+
 def load_action(yfile):
     with open(yfile, 'r') as f:
         return yaml.load(f)
