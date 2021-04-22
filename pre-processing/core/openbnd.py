@@ -349,7 +349,8 @@ class OpenBoundaries(object):
     def make_boundary(self,filename,dt=3600):
         if self.logger:
             self.logger.info("  Writing %s" %filename)
-        TimeSeries=np.arange(date2num(self.t0),date2num(self.t1)+1,dt/(24.*3600.))
+
+        TimeSeries=np.arange(date2num(self.t0),date2num(self.t1)+2*(dt/(24.*3600.)),dt/(24.*3600.))
        
         if filename.endswith('.th.nc') or filename.endswith('_nu.nc'):
             self.create_Dthnc(filename,TimeSeries)
