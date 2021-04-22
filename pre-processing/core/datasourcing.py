@@ -247,7 +247,7 @@ class download_data(object):
 
         # Download as daily file
         days = daterange(self.t0, self.t1+ datetime.timedelta(days=1))
-        if self.t1>datetime.datetime.now():
+        if self.t1>datetime.datetime.now() and source['id'].lower()=='predictwind':
             self.logger.info('  FORECAST')
             days = daterange(self.t0, self.t0+ datetime.timedelta(days=1))
 
