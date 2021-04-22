@@ -252,6 +252,7 @@ class download_data(object):
             days = daterange(self.t0, self.t0+ datetime.timedelta(days=1))
 
         date_str=[]
+        import pdb;pdb.set_trace()
         for day in days[:-1]:
             self.logger.info( " Sourcing data for %s-%s-%s" %(day.year, day.month, day.day))
             if day == days[-2]: 
