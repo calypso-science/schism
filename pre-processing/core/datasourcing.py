@@ -246,23 +246,25 @@ class download_data(object):
 
 
         # Download as daily file
-        days = daterange(self.t0, self.t1+ datetime.timedelta(days=1))
+        delta = source.get('dt')
+        days = daterange(self.t0, self.t1+ datetime.timedelta(seconds=delta*3600))
+
         if self.t1>datetime.datetime.now() and source['id'].lower()=='predictwind':
             self.logger.info('  FORECAST')
             days = daterange(self.t0, self.t0+ datetime.timedelta(days=1))
 
         date_str=[]
-        import pdb;pdb.set_trace()
+
         for day in days[:-1]:
             self.logger.info( " Sourcing data for %s-%s-%s" %(day.year, day.month, day.day))
-            if day == days[-2]: 
-                # if it's the end of a month, extrapolate to future
-                tend = day + datetime.timedelta(seconds=24*3600)
-            else: # it not, we do  dt not want to extrpolate to future
-                delta = source.get('dt')
-                # to avoid UDS getting time record in the future,
-                #     we need to hardwire for a valid last time record
-                tend = day + datetime.timedelta(seconds=(24-delta)*3600)
+            # if day == days[-2]: 
+            #     # if it's the end of a month, extrapolate to future
+            #     tend = day + datetime.timedelta(seconds=24*3600)
+            # else: # it not, we do  dt not want to extrpolate to future
+            
+            # to avoid UDS getting time record in the future,
+            #     we need to hardwire for a valid last time record
+            tend = day + datetime.timedelta(seconds=(24-delta)*3600)
 
 
             filetmp = "%s%s.000000.nc" %(source.get('id'), day.strftime("%Y%m%d"))
