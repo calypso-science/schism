@@ -705,6 +705,7 @@ gen_wsett = ${gen_wsett}
 !-----------------------------------------------------------------------
 ! Outputs from WWM (USE_WWM must be on in Makefile)
 !-----------------------------------------------------------------------
+${WWM_output.replace('!N!', '\n')}
 !  iof_wwm(1)  = 1 !sig. height (m) {WWM_1}
 !  iof_wwm(2)  = 1 !Mean average period (sec) - TM01 {WWM_2}
 !  iof_wwm(3)  = 1 !Zero down crossing period for comparison with buoy (s) - TM02 {WWM_3}

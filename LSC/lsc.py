@@ -22,6 +22,7 @@ from PyQt5.QtWidgets import QMainWindow, QApplication, QWidget,QMessageBox,QInpu
 from pyschism.mesh import Hgrid
 import vqs
 import copy
+from pyproj import Proj, transform
 
 root_path = os.path.dirname(os.path.abspath(__file__))
 qtCreatorFile = os.path.join(root_path,"lsc.ui") 
@@ -230,14 +231,38 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.Ntrs=[]
         self.nlev=[]
 
-        self.gr = Hgrid.open(os.path.expanduser(app.arguments()[1]))
+        epsg=app.arguments()[2]
+        self.gr = Hgrid.open(os.path.expanduser(app.arguments()[1]),crs="EPSG:%i" % int(epsg))
+        if int(epsg)==4326:
+            epsgout=app.arguments()[3]
+            self.gr.transform_to(int(epsgout))
+
+
         self.gr.values[:]=self.gr.values[:]*-1.
         self.nlev=copy.deepcopy(self.gr)
         self.nlev.values[:]=self.nlev.values[:]*0
+        
+        self.gr.tri = np.array(
+                [list(map(self.gr.nodes.get_index_by_id, element[:-1]))
+                 for element in self.gr.elements.elements.values()
+                 if len(element) == 4])
 
+        
         self.create_transect()
         #self.hsm.setText('0:%i:50'% (np.ceil(self.gr.mesh.nodes[:,2].max())+50))
-        self.hsm.setText('2 12 22 32 42 52 62 72 82 200 2000')
+        dp=''
+        dp0=50
+        dz=20
+        I=0
+        while dp0+(I*dz)<np.ceil(self.gr.values.max())+(I*dz):
+            dp+=str(dp0+(I*dz))+' '
+            dp0=dp0+(I*dz)
+            I+=1
+
+
+
+        
+        self.hsm.setText(dp)
         self.vgrid=self.create_vgrid(maxdepth=np.ceil(self.gr.values.max()),hsm=self.get_hsm(self.hsm.text()))
         self.vgrid.compute_zcor(self.gr.values,a_vqs0=-0.3,opt=1)
         self.nlev.values[:]=self.vgrid.kbp[:,0]
@@ -398,8 +423,11 @@ class MyApp(QMainWindow, Ui_MainWindow):
 
     def draw_map(self,nval=60,Zmin=[],Zmax=[]):
         gr=copy.deepcopy(self.gr)
-        elem=np.array(gr.elements,dtype=int)-1
-        
+
+        elem=np.array(gr.tri,dtype=int)
+
+
+
 
         if hasattr(self,'axes'):
             ylim=self.axes.get_ylim()
@@ -413,16 +441,18 @@ class MyApp(QMainWindow, Ui_MainWindow):
             self.axes = self.fig.add_axes([0, 0, 1, 1])
             self.axes_cb = self.fig.add_axes([0.85, 0.05, 0.03, 0.9])
             ylim=[]
-            self.tri_idx=elem[:,-1]<0
-            self.quad=~self.tri_idx
-            self.tris=elem[self.tri_idx,0:3]
-            self.els=np.ones((self.tris.shape[0]+self.quad.nonzero()[0].shape[0]*2,3),dtype=int)
+            #self.tri_idx=elem[:,-1]<0
+            #self.quad=~self.tri_idx
+            self.tris=elem[:,0:3]
+            #self.els=np.ones((self.tris.shape[0]+self.quad.nonzero()[0].shape[0]*2,3),dtype=int)
+            self.els=np.ones((self.tris.shape[0],3),dtype=int)
             self.els[0:self.tris.shape[0],:]=self.tris[:]
-            I=self.tris.shape[0]
-            for i,q in enumerate(self.quad.nonzero()[0]):
-            	self.els[I,:]=elem[q,0:3]
-            	self.els[I+1,:]=elem[q,[0,2,3]]
-            	I=I+2
+            #I=self.tris.shape[0]
+            # for i,q in enumerate(self.quad.nonzero()[0]):
+            # 	self.els[I,:]=elem[q,0:3]
+            # 	self.els[I+1,:]=elem[q,[0,2,3]]
+            # 	I=I+2
+            #import pdb;pdb.set_trace()
             self.triang=Triangulation(gr.x,gr.y,self.els)
 
 
@@ -465,8 +495,8 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.axes.plot(self.Xtrs,self.Ytrs,'r-',gid='transect')
     
         self.cb=self.fig.colorbar(tricon,self.axes_cb,ticks=ticks)
-        if view_type=='lev':
-            self.cb.ax.set_yticklabels(levels)  # horizontal colorbar
+        #if view_type=='lev':
+       #     self.cb.ax.set_yticklabels(levels)  # horizontal colorbar
 
 
         self.titre.setText(tit)

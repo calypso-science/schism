@@ -150,10 +150,10 @@ def plot2D(X,Y,F,Z,params):
     tt1 = ax.text(.5, 1.05, '', transform = ax.transAxes, va='center',fontsize = 30)
     ax.tick_params(labelsize=15)
 
-    Zmin=Z.min()
+    Zmin=Z[Z>0].min()
     Zmax=Z.max()
     levels = numpy.linspace(Zmin,Zmax, 60)
-    F=plt.tricontourf(X,Y,F,Z)#,vmin=Z.min(),vmax=Z.max(),cmap=plt.cm.Spectral_r,levels=levels)
+    F=plt.tricontourf(X,Y,F,Z,vmin=Z.min(),vmax=Z.max(),cmap=plt.cm.Spectral_r,levels=levels)
     plt.clim(Zmin,Zmax)
     plt.xlabel('Easting (meters)',fontsize = 30)
     plt.ylabel('Northing (meters)',fontsize = 30)

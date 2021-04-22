@@ -13,14 +13,17 @@ import json
 
 def interp3D(zdata,udata,wanted_depth):
 	m,n=zdata.shape
-	zz=zdata.flatten(1)
+
+	zz=zdata.flatten('F')
 	yinterp=numpy.zeros(shape=(n,1))
-	yv=udata.flatten(1)
+	yv=udata.flatten('F')
+
 	for i in range(0,n):
 		if((wanted_depth[i] < zz[((i*m)+0)]) or (wanted_depth[i] > zz[(i*m)+(m-1)])):
 			yinterp[i] = numpy.NaN
 		else:
 			for j in range(0,m):
+
 				if(wanted_depth[i]<=zz[(i*m)+j]):
 					yinterp[i] = (wanted_depth[i]-zz[(i*m)+(j-1)]) / (zz[(i*m)+j]-zz[(i*m)+(j-1)]) * (yv[(i*m)+j]-yv[(i*m)+(j-1)]) + yv[(i*m)+(j-1)]; 
 					           									
@@ -112,6 +115,7 @@ def process(POS,fileout,dirin,Istart,Iend,params,depth,prefix):
 		fout.append(fileout+'_'+str(x)+'_'+str(y)+'.txt')
 
 		nodes.append(get_closest_node(X,Y,x,y))
+	print(nodes)
 	
 
 

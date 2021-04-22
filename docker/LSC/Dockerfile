@@ -65,6 +65,11 @@ RUN cd /tmp &&\
 
 RUN pip3 install pathlib
 RUN pip3 install Cython
+
+RUN pip3 install netcdf-flattener
+RUN pip3 install --upgrade pip
+RUN pip3 install --upgrade proj
+
 RUN echo "-----------------Install PySCHISM -----------------" &&\
     cd /tmp &&\
     git clone https://github.com/schism-dev/pyschism &&\
@@ -83,21 +88,23 @@ RUN yum -y install mesa-libGL
 RUN pip3 install PyQt5
 
 
-RUN cd /usr/local/lib/python3.6/site-packages/pyschism/mesh/ &&\
-    sed -i "s|@lru_cache|@lru_cache()|g" base.py &&\
-    sed -i "s|@lru_cache|@lru_cache()|g" hgrid.py &&\
-    sed -i "s|@lru_cache|@lru_cache()|g" vgrid.py &&\
-    sed -i "s|@lru_cache|@lru_cache()|g" mesh.py
+#RUN cd /usr/local/lib/python3.6/site-packages/pyschism/mesh/ &&\
+#    sed -i "s|@lru_cache|@lru_cache()|g" base.py &&\
+#    sed -i "s|@lru_cache|@lru_cache()|g" hgrid.py &&\
+#    sed -i "s|@lru_cache|@lru_cache()|g" vgrid.py &&\
+#    sed -i "s|@lru_cache|@lru_cache()|g" mesh.py
 
-RUN cd /usr/local/lib/python3.6/site-packages/pyschism/forcing/ &&\
-    sed -i "s|@lru_cache|@lru_cache()|g" tides.py
+#RUN cd /usr/local/lib/python3.6/site-packages/pyschism/forcing/ &&\
+#    sed -i "s|@lru_cache|@lru_cache()|g" tides.py
 ##
-RUN cd /usr/local/lib/python3.6/site-packages/pyschism/driver/&&\
-    sed -i "s|@lru_cache|@lru_cache()|g" driver.py &&\
-    sed -i "s|@lru_cache|@lru_cache()|g" param.py
+#RUN cd /usr/local/lib/python3.6/site-packages/pyschism/driver/&&\
+#    sed -i "s|@lru_cache|@lru_cache()|g" driver.py &&\
+#    sed -i "s|@lru_cache|@lru_cache()|g" param.py
 
 
 RUN yum -y install qt qt-devel libxkbcommon-x11
+
+RUN yum -y install udunits2 xcb-util-wm xcb-util-image xcb-util-keysyms xcb-util-renderutil
 
 USER $USER
 ENV HOME /home/$USER

@@ -222,7 +222,8 @@ class SCHISM():
 
             h0=cfg.config['hydro']['h0']
             deltc=cfg.config['hydro']['dt']*cfg.config['hydro']['nstep_wwm']
-            wave = Wave(root=self.rootdir,hgrid=self.hgrid,wwm=self.wave['config'],t0=t0,t1=t1,deltc=0,h0=0, logger=self.logger)
+
+            wave = Wave(root=self.rootdir,hgrid=self.hgrid,wwm=self.wave['config'],t0=t0,t1=t1,deltc=deltc,h0=h0, logger=self.logger)
             wave.make_wave(self.wave_tmp,os.path.join(self.rootdir,'wwminput.nml'))
             wave.make_forcing(self.wave['config'].get('FILEWAVE','bndfiles.dat'),ww3=self.wave.get('ww3',None))
         

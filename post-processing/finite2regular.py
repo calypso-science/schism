@@ -59,38 +59,72 @@ class MakeMeshMask():
 
     def get_coords(self,filgrid):
         mesh = self.load_mesh(filgrid)
-
-        x = np.array([ row[1][0][0] for row in mesh.nodes])
-        y = np.array([ row[1][0][1] for row in mesh.nodes])
+        #x = np.array([ row[1][0][0] for row in mesh.nodes])
+        #y = np.array([ row[1][0][1] for row in mesh.nodes])
+        x=mesh.x
+        y=mesh.y
         return x, y
 
     def get_boundary_segments(self, type):
         '''Docstring'''
 
-        coast_segment, obc_segment = list(), list()
-        bnd_segment, island_segment = list(), list()
-        #
-        for flag in self.mesh.boundaries:
-            for bnd in self.mesh.boundaries[flag]:
-                segment = self.mesh.boundaries[flag][bnd]['indexes']
 
-                if flag==0: # coastline
-                    coast_segment.append(segment)
-                    bnd_segment.append(segment)
-                elif flag==1: #islands
-                    island_segment.append(segment)
-                else:# 'open boundary' in flag: # ocean
-                    obc_segment.append(segment)
-                    bnd_segment.append(segment)
+        coast_segment=self.mesh.boundaries._land.indexes
+        obc_segment = self.mesh.boundaries._ocean.indexes
+        island_segment = self.mesh.boundaries._interior.indexes
+        #
 
         if type == 'mesh_edge':
-            return np.array(bnd_segment)
+            bnd_segments=[]
+            for seg in coast_segment:
+                bnd_segments.append(seg)
+            for seg in obc_segment:
+                bnd_segments.append(seg)
+            return np.array(bnd_segments)
         elif type == 'obc':
-            return np.array(obc_segment)
+            obc_segments=[]
+            for seg in obc_segment:
+                obc_segments.append(seg)
+            return np.array(obc_segments)
         elif type == 'coastline':
-            return np.array(coast_segment)
+            coast_segments=[]
+            for seg in coast_segment:
+                coast_segments.append(seg)
+            return np.array(coast_segments)
         elif type == 'island':
-            return np.array(island_segment)
+            island_segments=[]
+            for seg in island_segment:
+                island_segments.append(seg)
+            return np.array(island_segments)
+
+    # def get_boundary_segments(self, type):
+    #     '''Docstring'''
+
+    #     coast_segment, obc_segment = list(), list()
+    #     bnd_segment, island_segment = list(), list()
+    #     #
+    #     import pdb;pdb.set_trace()
+    #     for flag in self.mesh.boundaries:
+    #         for bnd in self.mesh.boundaries[flag]:
+    #             segment = self.mesh.boundaries[flag][bnd]['indexes']
+
+    #             if flag==0: # coastline
+    #                 coast_segment.append(segment)
+    #                 bnd_segment.append(segment)
+    #             elif flag==1: #islands
+    #                 island_segment.append(segment)
+    #             else:# 'open boundary' in flag: # ocean
+    #                 obc_segment.append(segment)
+    #                 bnd_segment.append(segment)
+
+    #     if type == 'mesh_edge':
+    #         return np.array(bnd_segment)
+    #     elif type == 'obc':
+    #         return np.array(obc_segment)
+    #     elif type == 'coastline':
+    #         return np.array(coast_segment)
+    #     elif type == 'island':
+    #         return np.array(island_segment)
 
     def order_segments(self, segments):
         '''Docstring'''

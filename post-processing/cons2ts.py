@@ -1,6 +1,5 @@
 import datetime
 import sys
-sys.path.append('/home/remy/Calypso/Software/schism-dev/pyschism') 
 from netCDF4 import Dataset
 from ttide.t_tide import t_tide
 from ttide.t_getconsts import t_getconsts
@@ -11,20 +10,17 @@ import os
 import numpy as np
 from matplotlib.dates import num2date,date2num
 import copy
-import pandas as pd
 from scipy.interpolate import griddata
 from pyschism.mesh import Hgrid
 from pyproj import Proj,transform
 from descartes.patch import PolygonPatch
 from shapely.ops import cascaded_union
 from shapely.geometry import Point, Polygon
-        # dset = xr.Dataset(dset_dict)
-        # dset.attrs = dict(type="SCHISM standard output file")
-        # dset.to_netcdf(path=join(self.nest.outdir, self.filename_dict[outtype]), format='NETCDF4')
+
 # -------------------------------------------- BASE MODEL CLASSES -----------------------------
 WGS84 = 4326 # Spatial Reference System
 #-------------------------------------------- GRID METHODS -----------------------------
-def transform_proj(x, y, in_espg=2193, out_espg=4326):
+def transform_proj(x, y, in_espg, out_espg):
     ''' Performs cartographic transformations (converts from
         longitude,latitude to native map projection x,y coordinates and
         vice versa) using proj (http://trac.osgeo.org/proj/).
@@ -36,12 +32,12 @@ def transform_proj(x, y, in_espg=2193, out_espg=4326):
 
 class MakeMeshMask():   
     '''Docstring'''
-    def __init__(self,lim, resolution,filgrid, **kwargs):
+    def __init__(self,lim, resolution,filgrid,hgrid_proj, **kwargs):
         super(MakeMeshMask, self).__init__(**kwargs)
 
-        hgrid_proj = 2193
-        self.mesh = self.load_mesh(filgrid)
-        x, y = self.get_coords(filgrid)
+
+        self.mesh = self.load_mesh(filgrid,hgrid_proj)
+        x, y = self.get_coords(filgrid,hgrid_proj)
  
         if  hgrid_proj != WGS84:
             self.lon, self.lat = transform_proj(x, y, in_espg=hgrid_proj, out_espg=WGS84)
@@ -51,78 +47,103 @@ class MakeMeshMask():
         self.resolution = resolution
         self.lim= lim
         
-    def load_mesh(self,filgrid):
-        hgrid = Hgrid.open(filgrid,crs="EPSG:%i" % 2193)
+    def load_mesh(self,filgrid,epsg):
+        hgrid = Hgrid.open(filgrid,crs="EPSG:%i" % epsg)
         return hgrid
 
-    def get_coords(self,filgrid):
-        mesh = self.load_mesh(filgrid)
-
-        x = np.array([ row[1][0][0] for row in mesh.nodes])
-        y = np.array([ row[1][0][1] for row in mesh.nodes])
+    def get_coords(self,filgrid,epsg):
+        mesh = self.load_mesh(filgrid,epsg)
+        #x = np.array([ row[1][0][0] for row in mesh.nodes])
+        #y = np.array([ row[1][0][1] for row in mesh.nodes])
+        x=mesh.x
+        y=mesh.y
         return x, y
 
     def get_boundary_segments(self, type):
         '''Docstring'''
 
-        coast_segment, obc_segment = list(), list()
-        bnd_segment, island_segment = list(), list()
-        #
-        for flag in self.mesh.boundaries:
-            for bnd in self.mesh.boundaries[flag]:
-                segment = self.mesh.boundaries[flag][bnd]['indexes']
-                segment=[int(x)-1 for x in segment]
 
-                if flag==0: # coastline
-                    coast_segment.append(segment)
-                    bnd_segment.append(segment)
-                elif flag==1: #islands
-                    island_segment.append(segment)
-                else:# 'open boundary' in flag: # ocean
-                    obc_segment.append(segment)
-                    bnd_segment.append(segment)
+        coast_segment=self.mesh.boundaries._land.indexes
+        obc_segment = self.mesh.boundaries._ocean.indexes
+        island_segment = self.mesh.boundaries._interior.indexes
+
+        #
 
         if type == 'mesh_edge':
-            return np.array(bnd_segment)
+            bnd_segments=[]
+            for seg in coast_segment:
+                bnd_segments.append([x+1 for x in seg])
+            for seg in obc_segment:
+                bnd_segments.append([x+1 for x in seg])
+            return np.array(bnd_segments)
         elif type == 'obc':
-            return np.array(obc_segment)
+            obc_segments=[]
+            for seg in obc_segment:
+                obc_segments.append([x+1 for x in seg])
+            return np.array(obc_segments)
         elif type == 'coastline':
-            return np.array(coast_segment)
+            coast_segments=[]
+            for seg in coast_segment:
+                coast_segments.append([x+1 for x in seg])
+            return np.array(coast_segments)
         elif type == 'island':
-            return np.array(island_segment)
+            island_segments=[]
+            for seg in island_segment:
+                island_segments.append([x+1 for x in seg])
+            return np.array(island_segments)
+
+    # def get_boundary_segments(self, type):
+    #     '''Docstring'''
+
+    #     coast_segment, obc_segment = list(), list()
+    #     bnd_segment, island_segment = list(), list()
+    #     #
+    #     import pdb;pdb.set_trace()
+    #     for flag in self.mesh.boundaries:
+    #         for bnd in self.mesh.boundaries[flag]:
+    #             segment = self.mesh.boundaries[flag][bnd]['indexes']
+
+    #             if flag==0: # coastline
+    #                 coast_segment.append(segment)
+    #                 bnd_segment.append(segment)
+    #             elif flag==1: #islands
+    #                 island_segment.append(segment)
+    #             else:# 'open boundary' in flag: # ocean
+    #                 obc_segment.append(segment)
+    #                 bnd_segment.append(segment)
+
+    #     if type == 'mesh_edge':
+    #         return np.array(bnd_segment)
+    #     elif type == 'obc':
+    #         return np.array(obc_segment)
+    #     elif type == 'coastline':
+    #         return np.array(coast_segment)
+    #     elif type == 'island':
+    #         return np.array(island_segment)
 
     def order_segments(self, segments):
         '''Docstring'''
-        #segments=np.flipud(segments)
-        ordered_nodes = list()
+
         consume_nodes = segments.tolist()
-        #import pdb;pdb.set_trace()
-        ordered_nodes.append(consume_nodes[1])
-        ordered_nodes.append(consume_nodes[3])
-        ordered_nodes.append(consume_nodes[0])
-        ordered_nodes.append(consume_nodes[2])
+        ordered_nodes=[consume_nodes.pop(0)]
+
+        while consume_nodes:
+            for s,seg in enumerate(consume_nodes):
+                if ordered_nodes[-1][-1]==seg[0]:
+                    nodes=consume_nodes.pop(s)
+                    ordered_nodes.append(nodes)
+                elif ordered_nodes[-1][-1]==seg[-1]:
+                    nodes=consume_nodes.pop(s)[::-1]
+                    ordered_nodes.append(nodes)
+                elif ordered_nodes[0][0]==seg[0]:
+                    nodes=consume_nodes.pop(s)[::-1]
+                    ordered_nodes=[nodes]+ordered_nodes
+                elif ordered_nodes[0][0]==seg[-1]:
+                    nodes=consume_nodes.pop(s)
+                    ordered_nodes=[nodes]+ordered_nodes                  
+
+
         
-        # while consume_nodes:
-        #     for s, segment in enumerate(segments):
-        #         if not ordered_nodes:
-        #             print(1)
-        #             ordered_nodes.append(consume_nodes.pop(consume_nodes.index(segment)))
-        #             continue
-        #         for seg in consume_nodes:
-        #             if seg[0] == ordered_nodes[-1][-1]:
-        #                 ordered_nodes.append(consume_nodes.pop(consume_nodes.index(seg)))
-        #                 print('bon')
-        #                 break
-        #         for seg in consume_nodes:
-        #             #import pdb;pdb.set_trace()
-        #             if seg[0] == ordered_nodes[-1][-1]+1:
-        #                 ordered_nodes.append(consume_nodes.pop(consume_nodes.index(seg)))
-        #                 break
-        #         if len(consume_nodes)==1:
-        #             ordered_nodes.append(consume_nodes.pop(0))
-        #             break
-
-
         return ordered_nodes
 
     def get_mesh_polygon(self):
@@ -135,13 +156,13 @@ class MakeMeshMask():
 
         for seg in mesh_edge:
             for node in seg:
-                mesh_nodes.append((self.lon[node],self.lat[node]))
+                mesh_nodes.append((self.lon[int(node)-1],self.lat[int(node)-1]))
 
         # load  island edge segments
         island_edge = self.get_boundary_segments(type='island')
         island_nodes = list()
         for seg in island_edge:
-            island_nodes.append([(self.lon[node],self.lat[node]) for node in seg])
+            island_nodes.append([(self.lon[int(node)-1],self.lat[int(node)-1]) for node in seg])
 
         return Polygon(mesh_nodes, island_nodes) #
 
@@ -228,8 +249,8 @@ def create_dataset(times,units,X,Y,dt,Vars,lev=0):
                     attrs  = {
                         '_FillValue': 1e20,
                         'units'     : 'm.s^{-1}',
-                        'long_name': 'Eastward tidal current',
-                        'standard_name': 'eastward_sea_water_velocity_due_to_tides',
+                        'long_name': 'u component of barotropic current',
+                        'standard_name': 'barotropic_eastward_sea_water_velocity',
                         }
                     )
 
@@ -244,8 +265,8 @@ def create_dataset(times,units,X,Y,dt,Vars,lev=0):
                     attrs  = {
                         '_FillValue': 1e20,
                         'units'     : 'm.s^{-1}',
-                        'long_name': 'Northward tidal current',
-                        'standard_name': 'northward_sea_water_velocity_due_to_tides',
+                        'long_name': 'v component of barotropic current',
+                        'standard_name': 'barotropic_northward_sea_water_velocity',
                         }
                     )
 
@@ -259,8 +280,8 @@ def create_dataset(times,units,X,Y,dt,Vars,lev=0):
                     attrs  = {
                         '_FillValue': 1e20,
                         'units'     : 'm.s^{-1}',
-                        'long_name': 'Eastward depth-averaged tidal current',
-                        'standard_name': 'barotropic_eastward_sea_water_velocity_due_to_tides',
+                        'long_name': 'u component of barotropic current',
+                        'standard_name': 'barotropic_eastward_sea_water_velocity',
                         }
                     )
 
@@ -289,8 +310,8 @@ def create_dataset(times,units,X,Y,dt,Vars,lev=0):
                     attrs  = {
                         '_FillValue': 1e20,
                         'units'     : 'm.s^{-1}',
-                        'long_name': 'Northward depth-averaged tidal current',
-                        'standard_name': 'barotropic_nortward_sea_water_velocity_due_to_tides',
+                        'long_name': 'v component of barotropic current',
+                        'standard_name': 'barotropic_northward_sea_water_velocity',
                         }
                     )
 
@@ -311,7 +332,7 @@ def create_dataset(times,units,X,Y,dt,Vars,lev=0):
     ds = xr.Dataset(dset,attrs={'type':"SCHISM standard output file"})
     return ds
 
-def extract_HC(consfile,Vars, lim, conlist=None,min_depth=1,lev=0):
+def extract_HC(consfile,Vars, lim, epsg,conlist=None,min_depth=1,lev=0):
     """
     Extract harmonic constituents and interpolate onto points in lon,lat
     set "z" to specifiy depth for transport to velocity conversion
@@ -333,7 +354,8 @@ def extract_HC(consfile,Vars, lim, conlist=None,min_depth=1,lev=0):
 
     Z=f.variables['Depth'][:]
 
-    X, Y = transform_proj(X, Y, in_espg=2193, out_espg=WGS84)
+    X, Y = transform_proj(X, Y, in_espg=epsg, out_espg=WGS84)
+
     gd=(X>=lim[0]) & (X<=lim[1]) & (Y>=lim[2]) & (Y <=lim[3]) & (Z>=min_depth )
 
     X=X[gd]
@@ -413,14 +435,17 @@ def get_tide(ju,freq,tidecon0,t_time,lat0):
 
 
 
-    snr = (tidecon[:, 0,0] / tidecon[:, 1,0]) ** 2
-    I = snr > 2
+    # snr = (tidecon[:, 0,0] / tidecon[:, 1,0]) ** 2
+    # I = snr > 2
+    # tidecon = tidecon[I, :]
+    # ju = np.asarray(ju)[I]
+    # freq = freq[I]
 
+    snr = (tidecon[:, 0,:] / tidecon[:, 1,:]) ** 2
+    mask = snr < 2
     
-    tidecon = tidecon[I, :]
-    ju = np.asarray(ju)[I]
-    freq = freq[I]
 
+    ju = np.asarray(ju)
 
     ap = np.multiply(tidecon[:, 0] / 2.0,np.exp(-1j * tidecon[:, 2] * np.pi / 180))
     am = np.conj(ap)
@@ -429,26 +454,32 @@ def get_tide(ju,freq,tidecon0,t_time,lat0):
     jdmid = np.mean(t_time[0:((2 * int((max(t_time.shape) - 1) / 2)) + 1)])
 
     #import pdb;pdb.set_trace()
-    v, u, f = t_vuf('nodal', [jdmid], ju, lat0)
+    v, u, f = t_vuf('nodal', jdmid, ju, lat0)
 
     ap = ap * np.kron(np.ones((ap.shape[1],1)),f * np.exp(+1j * 2 * np.pi * (u + v))).T
     am = am * np.kron(np.ones((ap.shape[1],1)),f * np.exp(-1j * 2 * np.pi * (u + v))).T
 
     t_time = t_time - jdmid
 
-    n, m = t_time.shape
+    #n, m = t_time.shape
     yout = np.zeros([ap.shape[1], 1], dtype='complex128')
     touter = np.outer(24 * 1j * 2 * np.pi * freq, t_time[0])
 
     touter=np.kron(np.ones((1,ap.shape[1])),touter)
 
-    yout[:,0]=np.sum(np.multiply(np.exp(touter), ap), axis=0)+np.sum(np.multiply(np.exp(-touter), am), axis=0)
+    x1=np.multiply(np.exp(touter), ap)
+    x2=np.multiply(np.exp(-touter), am)
+
+    mask_x1 = np.ma.array(x1, mask = mask)
+    mask_x2 = np.ma.array(x2, mask = mask)
+
+    yout[:,0]=np.sum(mask_x1, axis=0)+np.sum(mask_x2, axis=0)
 
     tide=np.real(yout)
 
 
     return tide
-def process(fileout,gridfile,consfile,tstart,tend,dt,params,res,Cons,levs,min_depth,lim):
+def process(fileout,gridfile,consfile,tstart,tend,dt,params,res,Cons,levs,min_depth,lim,epsg):
 
     if type(levs)!=type([]):
         levs=[levs]
@@ -456,7 +487,7 @@ def process(fileout,gridfile,consfile,tstart,tend,dt,params,res,Cons,levs,min_de
     TimeSeries=np.arange(date2num(tstart),date2num(tend),dt/(24.))
 
 
-    msk=MakeMeshMask(lim,res,gridfile)
+    msk=MakeMeshMask(lim,res,gridfile,epsg)
     Mask=msk.make_grid_mask()
     mask = Mask.mask.values
     if lim == None:
@@ -475,7 +506,7 @@ def process(fileout,gridfile,consfile,tstart,tend,dt,params,res,Cons,levs,min_de
 
     for i,lev in enumerate(levs):
         print('extracting lev %f' %lev)
-        var,tfreq,consindex,X,Y,Z=extract_HC(consfile,params, lim, conlist=Cons,min_depth=min_depth,lev=lev)
+        var,tfreq,consindex,X,Y,Z=extract_HC(consfile,params, lim,epsg, conlist=Cons,min_depth=min_depth,lev=lev)
 
         if i==0:
             ugrid = (X, Y)
@@ -508,29 +539,22 @@ def process(fileout,gridfile,consfile,tstart,tend,dt,params,res,Cons,levs,min_de
     ds['dep'][:]=masked_vari
     ds['dep']=ds['dep'][:].fillna(1e20)
 
-    # h=np.zeros((ds['ssh'].shape))
-    # h[:]=ds['dep'][:]
-    # h+=ds['ssh'][:]
-    # z0=0.001
-    # fac=np.log(h/z0)/(np.log(h/z0)-1)
-    # print(np.nanmax(fac))
-    # ds['ust'][:]=ds['umt'][:]*fac
-    # ds['vst'][:]=ds['vmt'][:]*fac
+
 
     ds.to_netcdf(fileout)
 if __name__ == "__main__":
     
     import argparse
-    parser = argparse.ArgumentParser(prog='cons2ts.py', usage='%(prog)s fileout consfile params tstart tend [options]')
+    parser = argparse.ArgumentParser(prog='cons2ts.py', usage='%(prog)s fileout consfile params tstart tend res gridfile [options]')
     ## main arguments
     parser.add_argument('fileout', type=str,help='name of the output tidal file')
-    parser.add_argument('consfile', type=str,help='Folder with all the SCHSIM files')
+    parser.add_argument('consfile', type=str,help='constituent file')
     parser.add_argument('params', type=str,nargs='+',help='Parameters (i.e e um vm')
     parser.add_argument('tstart', type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'),help='start time')
     parser.add_argument('tend', type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'),help='end time')
     parser.add_argument('res', type=float,help='resolution')
     parser.add_argument('gridfile',type=str,help='schism grid')
-    #'/home/remy/Calypso/Projects/003_HG_America/hgrid2.gr3'
+
 
 
     ## options  
@@ -539,7 +563,8 @@ if __name__ == "__main__":
     parser.add_argument('--lev', type=float,nargs='+',default=0,help='outputs level 0 -1 -2 ... ')
     parser.add_argument('--lim', type=float,help='Xlim,Ylim',nargs='+')
     parser.add_argument('--min_depth', type=float,default=1,help='min_depth')
-
+    parser.add_argument('--epsg', type=int,default=2193,help='EPSG')
+    
     args = parser.parse_args()
     
 
@@ -552,4 +577,5 @@ if __name__ == "__main__":
         args.cons,\
         args.lev,\
         args.min_depth,
-        args.lim)
+        args.lim,
+        args.epsg)

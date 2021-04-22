@@ -279,37 +279,27 @@ class ModelConfig(object):
 
         
     def _set_default_wwm(self):
-        # WWM - waves params
-        if 'coupling' in self.nest.physics.__dict__:
-                wwm_params = parsectl(join(STATIC_DIR, 'wwm_default_input_params.yaml')).__dict__
-                wwm_params = dict((k.lower(), v) for k, v in wwm_params.items())
-        
-                wwm_output = parsectl(join(STATIC_DIR, 'wwm_default_output_params.yaml')).__dict__
-                wwm_output = dict((k.lower(), v) for k, v in wwm_output.items())
-                
-                config_dict['wwm_params'] = dict(container=Container(), defaults=wwm_params)
-                config_dict['wwm_output'] = dict(container=Container(), defaults=wwm_output)
-        
-        for cfg in config_dict.keys():
-            if cfg in self.nest:
-                exec("params = self.nest.%s.__dict__"%cfg)
-                params = dict((k.lower(), v) for k, v in params.items())
-                for pkey in config_dict[cfg]['defaults']:
-                    if pkey in params:
-                        params[pkey] = params.get(pkey, config_dict[cfg]['defaults'][pkey])
-                    else:
-                        params[pkey] = config_dict[cfg]['defaults'][pkey]   
-                config_dict[cfg]['container'].__dict__ = params
-            else:   
-                config_dict[cfg]['container'].__dict__ = config_dict[cfg]['defaults']
-            exec("self.nest.%s = config_dict[cfg]['container']"%cfg) 
-        
+        self.config['hydro']['WWM_output']=''
+        for n in range(1,29):
+            if self.config['hydro']['icou_elfe_wwm']==1:    
+                if 'WWM_'+str(n) in self.userconfig['hydro']:
+                    self.config['hydro']['WWM_output']+='  iof_wwm(%i) = %i !N!' %(n,self.userconfig['hydro']['WWM_'+str(n)])
+                else:
+                    self.config['hydro']['WWM_output']+='  iof_wwm(%i) = 0 !N!' %n
+            else:
+                self.config['hydro']['WWM_output']+='!   iof_wwm(%i) = 0 !N!' %n
+
+
+        self.config['hydro']['WWM_output']='"'+self.config['hydro']['WWM_output']+'"'
+
+
     def _set_params_relations(self,module,t0,t1):
         ''' Docstring'''
 
         self._add_more_tracers()
         self._update_timings(t0,t1)
         self._choose_diffusion()
+        self._set_default_wwm()
 
     def _choose_diffusion(self):
         mode=self.userconfig['hydro'].get('mode','diffusion 1')
