@@ -37,7 +37,9 @@ class download_data(object):
         os.system("ncks -O -C -x -v step %s %s"%(filein, filein))
         os.system("ncks -O -C -x -v time %s %s"%(filein, filein))
         os.system("ncrename -O -v valid_time,time %s %s"%(filein, filein))
-
+        os.system("ncks -O -3 %s %s"%(filein, filein))
+        os.system("ncrename -O -d step,time %s %s"%(filein, filein))
+        os.system("ncks -O -4 %s %s"%(filein, filein))
 #        os.system("ncks -O --mk_rec_dmn time %s %s" %(filein, filein)) 
         os.system("ncpdq -O -U %s %s" %(filein, filein)) 
         os.system("rm %s" %(filein+'.grb*'))
