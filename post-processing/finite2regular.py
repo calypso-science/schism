@@ -68,63 +68,37 @@ class MakeMeshMask():
     def get_boundary_segments(self, type):
         '''Docstring'''
 
-
-        coast_segment=self.mesh.boundaries._land.indexes
-        obc_segment = self.mesh.boundaries._ocean.indexes
-        island_segment = self.mesh.boundaries._interior.indexes
+        coast_segment, obc_segment = list(), list()
+        bnd_segment, island_segment = list(), list()
         #
+        [island_segment.append(x) for x in self.mesh.boundaries._interior['indexes']]
+        [coast_segment.append(x) for x in self.mesh.boundaries._land['indexes']]
+        [bnd_segment.append(x) for x in self.mesh.boundaries._land['indexes']]
+        [obc_segment.append(x) for x in self.mesh.boundaries._ocean['indexes']]
+        [bnd_segment.append(x) for x in self.mesh.boundaries._ocean['indexes']]
 
+        # for flag in self.mesh.boundaries:
+        #     for bnd in self.mesh.boundaries[flag]:
+        #         segment = self.mesh.boundaries[flag][bnd]['indexes']
+        #         segment=[int(x)-1 for x in segment]
+
+        #         if flag==0: # coastline
+        #             coast_segment.append(segment)
+        #             bnd_segment.append(segment)
+        #         elif flag==1: #islands
+        #             island_segment.append(segment)
+        #         else:# 'open boundary' in flag: # ocean
+        #             obc_segment.append(segment)
+        #             bnd_segment.append(segment)
         if type == 'mesh_edge':
-            bnd_segments=[]
-            for seg in coast_segment:
-                bnd_segments.append(seg)
-            for seg in obc_segment:
-                bnd_segments.append(seg)
-            return np.array(bnd_segments)
+            return np.array(bnd_segment)
         elif type == 'obc':
-            obc_segments=[]
-            for seg in obc_segment:
-                obc_segments.append(seg)
-            return np.array(obc_segments)
+            return np.array(obc_segment)
         elif type == 'coastline':
-            coast_segments=[]
-            for seg in coast_segment:
-                coast_segments.append(seg)
-            return np.array(coast_segments)
+            return np.array(coast_segment)
         elif type == 'island':
-            island_segments=[]
-            for seg in island_segment:
-                island_segments.append(seg)
-            return np.array(island_segments)
+            return np.array(island_segment)
 
-    # def get_boundary_segments(self, type):
-    #     '''Docstring'''
-
-    #     coast_segment, obc_segment = list(), list()
-    #     bnd_segment, island_segment = list(), list()
-    #     #
-    #     import pdb;pdb.set_trace()
-    #     for flag in self.mesh.boundaries:
-    #         for bnd in self.mesh.boundaries[flag]:
-    #             segment = self.mesh.boundaries[flag][bnd]['indexes']
-
-    #             if flag==0: # coastline
-    #                 coast_segment.append(segment)
-    #                 bnd_segment.append(segment)
-    #             elif flag==1: #islands
-    #                 island_segment.append(segment)
-    #             else:# 'open boundary' in flag: # ocean
-    #                 obc_segment.append(segment)
-    #                 bnd_segment.append(segment)
-
-    #     if type == 'mesh_edge':
-    #         return np.array(bnd_segment)
-    #     elif type == 'obc':
-    #         return np.array(obc_segment)
-    #     elif type == 'coastline':
-    #         return np.array(coast_segment)
-    #     elif type == 'island':
-    #         return np.array(island_segment)
 
     def order_segments(self, segments):
         '''Docstring'''
@@ -268,6 +242,84 @@ def create_dataset(times,unit,X,Y,Vars,depth,lev=0):
                         'units'     : 'm',
                         'long_name': 'Sea surface height',
                         'standard_name': 'sea_surface_height_above_geoid',
+                        }
+                    )
+
+        if var == 'WWM_1':
+            dset['hs']=xr.DataArray(
+                    data   = np.random.random((len(times),X.shape[0],X.shape[1])),   # enter data here
+                    dims   = ['time','lat','lon'],
+                    coords = {'time': times,
+                             "lat": (["lat"], Y[:,0]),
+                             "lon": (["lon"], X[0,:])},                        
+                    attrs  = {
+                        '_FillValue': 1e20,
+                        'units'     : 'm',
+                        'long_name': 'significant height of wind and swell wave',
+                        'standard_name': 'sea_surface_wave_significant_height',
+                        }
+                    )
+
+        if var == 'WWM_11':
+            dset['tp']=xr.DataArray(
+                    data   = np.random.random((len(times),X.shape[0],X.shape[1])),   # enter data here
+                    dims   = ['time','lat','lon'],
+                    coords = {'time': times,
+                             "lat": (["lat"], Y[:,0]),
+                             "lon": (["lon"], X[0,:])},                        
+                    attrs  = {
+                        '_FillValue': 1e20,
+                        'units'     : 's',
+                        'long_name': 'discrete peak period',
+                        'standard_name': 'discrete_peak_period',
+                        }
+                    )
+
+        if var == 'WWM_18':
+            dset['dpm']=xr.DataArray(
+                    data   = np.random.random((len(times),X.shape[0],X.shape[1])),   # enter data here
+                    dims   = ['time','lat','lon'],
+                    coords = {'time': times,
+                             "lat": (["lat"], Y[:,0]),
+                             "lon": (["lon"], X[0,:])},                        
+                    attrs  = {
+                        '_FillValue': 1e20,
+                        'units'     : 'deg',
+                        'long_name': 'peak direction',
+                        'standard_name': 'sea_surface_wave_peak_direction',
+                        }
+                    )
+
+
+
+        if var == 'salt': 
+            dset['salt']=xr.DataArray(
+                    data   = np.random.random((len(times),len(lev),X.shape[0],X.shape[1])),   # enter data here
+                    dims   = ['time','lev','lat','lon'],
+                    coords = {'time': times,
+                             "lev": (['lev'],lev),
+                             "lat": (["lat"], Y[:,0]),
+                             "lon": (["lon"], X[0,:])},  
+                    attrs  = {
+                        '_FillValue': 1e20,
+                        'units'     : 'PSU',
+                        'long_name': 'Water salinity',
+                        'standard_name': 'sea_water_salinity',
+                        }
+                    )
+        if var == 'temp': 
+            dset['temp']=xr.DataArray(
+                    data   = np.random.random((len(times),len(lev),X.shape[0],X.shape[1])),   # enter data here
+                    dims   = ['time','lev','lat','lon'],
+                    coords = {'time': times,
+                             "lev": (['lev'],lev),
+                             "lat": (["lat"], Y[:,0]),
+                             "lon": (["lon"], X[0,:])},  
+                    attrs  = {
+                        '_FillValue': 1e20,
+                        'units'     : 'degC',
+                        'long_name': 'Water temperature',
+                        'standard_name': 'sea_water_temperature',
                         }
                     )
 
@@ -486,6 +538,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
         Z=extract_raw(fileIN,params, lim, gd,lev=levs)
         for vv in Z:
             v=vv.replace('elev','ssh')
+            v=v.replace('WWM_1','hs').replace('WWM_11','tp').replace('WWM_18','dpm')
 
             for n in range(0,Z[vv].shape[0]):
                 nn=n+(Z[vv].shape[0]*(nfile-INDstart))
