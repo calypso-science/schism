@@ -90,15 +90,15 @@ class MakeMeshMask():
                 else:# 'open boundary' in flag: # ocean
                     obc_segment.append(segment)
                     bnd_segment.append(segment)
-        # if type == 'mesh_edge':
-        #     return np.array(bnd_segment)
-        # elif type == 'obc':
-        #     return np.array(obc_segment)
-        # elif type == 'coastline':
-        #     return np.array(coast_segment)
-        # elif type == 'island':
-        #     return np.array(island_segment)
-        import pdb;pdb.set_trace()
+        if type == 'mesh_edge':
+            return np.array(bnd_segment)
+        elif type == 'obc':
+            return np.array(obc_segment)
+        elif type == 'coastline':
+            return np.array(coast_segment)
+        elif type == 'island':
+            return np.array(island_segment)
+
 
     def order_segments(self, segments):
         consume_nodes = segments.tolist()
