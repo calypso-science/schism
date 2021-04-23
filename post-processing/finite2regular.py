@@ -1,6 +1,6 @@
 import datetime
 import sys
-sys.path.append('/home/remy/Calypso/Software/schism-dev/pyschism') 
+
 from netCDF4 import Dataset
 import netCDF4
 import xarray as xr
@@ -41,7 +41,7 @@ class MakeMeshMask():
     def __init__(self,lim, resolution,filgrid, **kwargs):
         super(MakeMeshMask, self).__init__(**kwargs)
 
-        hgrid_proj = 2193
+        hgrid_proj = 4326
         self.mesh = self.load_mesh(filgrid)
         x, y = self.get_coords(filgrid)
  
@@ -54,15 +54,15 @@ class MakeMeshMask():
         self.lim= lim
         
     def load_mesh(self,filgrid):
-        hgrid = Hgrid.open(filgrid,crs="EPSG:%i" % 2193)
+        hgrid = Hgrid.open(filgrid,crs="EPSG:%i" % 4326)
         return hgrid
 
     def get_coords(self,filgrid):
         mesh = self.load_mesh(filgrid)
-        #x = np.array([ row[1][0][0] for row in mesh.nodes])
-        #y = np.array([ row[1][0][1] for row in mesh.nodes])
-        x=mesh.x
-        y=mesh.y
+
+
+        x = np.array(mesh.x)
+        y = np.array(mesh.y)
         return x, y
 
     def get_boundary_segments(self, type):
@@ -71,7 +71,6 @@ class MakeMeshMask():
         coast_segment, obc_segment = list(), list()
         bnd_segment, island_segment = list(), list()
         #
-        import pdb;pdb.set_trace()
         [island_segment.append(x) for x in self.mesh.boundaries._interior['indexes']]
         [coast_segment.append(x) for x in self.mesh.boundaries._land['indexes']]
         [bnd_segment.append(x) for x in self.mesh.boundaries._land['indexes']]
@@ -100,14 +99,19 @@ class MakeMeshMask():
         elif type == 'island':
             return np.array(island_segment)
 
-
     def order_segments(self, segments):
-        '''Docstring'''
-
         consume_nodes = segments.tolist()
+        # import pdb;pdb.set_trace()
+        # ordered_nodes=[consume_nodes[3]]+[consume_nodes[6]]+\
+        # [consume_nodes[1]]+[consume_nodes[7]]+\
+        # [consume_nodes[0]]+[consume_nodes[8]]+\
+        # [consume_nodes[2]]+[consume_nodes[5]]+\
+        # [consume_nodes[4][::-1]]+[consume_nodes[9][::-1]]
         ordered_nodes=[consume_nodes.pop(0)]
-
-        while consume_nodes:
+        I=0
+        # import pdb;pdb.set_trace()
+        while consume_nodes and I<1000:
+            I+=1
             for s,seg in enumerate(consume_nodes):
                 if ordered_nodes[-1][-1]==seg[0]:
                     nodes=consume_nodes.pop(s)
@@ -123,7 +127,6 @@ class MakeMeshMask():
                     ordered_nodes=[nodes]+ordered_nodes                  
 
 
-        
         return ordered_nodes
 
     def get_mesh_polygon(self):
@@ -136,13 +139,13 @@ class MakeMeshMask():
 
         for seg in mesh_edge:
             for node in seg:
-                mesh_nodes.append((self.lon[int(node)-1],self.lat[int(node)-1]))
+                mesh_nodes.append((self.lon[node],self.lat[node]))
 
         # load  island edge segments
         island_edge = self.get_boundary_segments(type='island')
         island_nodes = list()
         for seg in island_edge:
-            island_nodes.append([(self.lon[int(node)-1],self.lat[int(node)-1]) for node in seg])
+            island_nodes.append([(self.lon[node],self.lat[node]) for node in seg])
 
         return Polygon(mesh_nodes, island_nodes) #
 
