@@ -71,6 +71,7 @@ class MakeMeshMask():
         coast_segment, obc_segment = list(), list()
         bnd_segment, island_segment = list(), list()
         #
+        import pdb;pdb.set_trace()
         [island_segment.append(x) for x in self.mesh.boundaries._interior['indexes']]
         [coast_segment.append(x) for x in self.mesh.boundaries._land['indexes']]
         [bnd_segment.append(x) for x in self.mesh.boundaries._land['indexes']]
