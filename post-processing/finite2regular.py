@@ -71,33 +71,33 @@ class MakeMeshMask():
         coast_segment, obc_segment = list(), list()
         bnd_segment, island_segment = list(), list()
         #
-        [island_segment.append(x) for x in self.mesh.boundaries._interior['indexes']]
-        [coast_segment.append(x) for x in self.mesh.boundaries._land['indexes']]
-        [bnd_segment.append(x) for x in self.mesh.boundaries._land['indexes']]
-        [obc_segment.append(x) for x in self.mesh.boundaries._ocean['indexes']]
-        [bnd_segment.append(x) for x in self.mesh.boundaries._ocean['indexes']]
+        # [island_segment.append(x) for x in self.mesh.boundaries._interior['indexes']]
+        # [coast_segment.append(x) for x in self.mesh.boundaries._land['indexes']]
+        # [bnd_segment.append(x) for x in self.mesh.boundaries._land['indexes']]
+        # [obc_segment.append(x) for x in self.mesh.boundaries._ocean['indexes']]
+        # [bnd_segment.append(x) for x in self.mesh.boundaries._ocean['indexes']]
 
-        # for flag in self.mesh.boundaries:
-        #     for bnd in self.mesh.boundaries[flag]:
-        #         segment = self.mesh.boundaries[flag][bnd]['indexes']
-        #         segment=[int(x)-1 for x in segment]
+        for flag in self.mesh.boundaries:
+            for bnd in self.mesh.boundaries[flag]:
+                segment = self.mesh.boundaries[flag][bnd]['indexes']
+                segment=[int(x)-1 for x in segment]
 
-        #         if flag==0: # coastline
-        #             coast_segment.append(segment)
-        #             bnd_segment.append(segment)
-        #         elif flag==1: #islands
-        #             island_segment.append(segment)
-        #         else:# 'open boundary' in flag: # ocean
-        #             obc_segment.append(segment)
-        #             bnd_segment.append(segment)
-        if type == 'mesh_edge':
-            return np.array(bnd_segment)
-        elif type == 'obc':
-            return np.array(obc_segment)
-        elif type == 'coastline':
-            return np.array(coast_segment)
-        elif type == 'island':
-            return np.array(island_segment)
+                if flag==0: # coastline
+                    coast_segment.append(segment)
+                    bnd_segment.append(segment)
+                elif flag==1: #islands
+                    island_segment.append(segment)
+                else:# 'open boundary' in flag: # ocean
+                    obc_segment.append(segment)
+                    bnd_segment.append(segment)
+        # if type == 'mesh_edge':
+        #     return np.array(bnd_segment)
+        # elif type == 'obc':
+        #     return np.array(obc_segment)
+        # elif type == 'coastline':
+        #     return np.array(coast_segment)
+        # elif type == 'island':
+        #     return np.array(island_segment)
 
     def order_segments(self, segments):
         consume_nodes = segments.tolist()
