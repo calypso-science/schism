@@ -98,6 +98,7 @@ class MakeMeshMask():
         #     return np.array(coast_segment)
         # elif type == 'island':
         #     return np.array(island_segment)
+        import pdb;pdb.set_trace()
 
     def order_segments(self, segments):
         consume_nodes = segments.tolist()
