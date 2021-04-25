@@ -56,7 +56,7 @@ class download_data(object):
         url+='&slat='+str(source.get('Grid')['y'])
         url+='&elon='+str(source.get('Grid')['x2'])
         url+='&wlon='+str(source.get('Grid')['x'])
-        url+='&time=5'
+        url+='&time=10'
         url+='&time='+str(source.get('dt'))
         nvar=copy.deepcopy(source.get('vars'))
         url+='&variables='
