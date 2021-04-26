@@ -268,9 +268,12 @@ class HotStart(object):
                 for nlev in range(0,arri_time.shape[0]):
                     if np.any(arri_time[nlev].to_masked_array()):
                         arr=mask_interp(xx,yy,arri_time[nlev].to_masked_array())
-                        if len(arr.z)>6:
+                        if len(arr.z)>1:
                             tmp[:,nlev]=arr(np.vstack((self.llon,self.llat)).T, nnear=1, p=2)
-
+                for nlev in range(1,tmp.shape[1]):
+                    bad=np.isnan(tmp[:,nlev])
+                    if np.any(bad):
+                        tmp[bad,nlev]=tmp[bad,nlev-1]
 
                 if self.zs.shape[1]==2: # 2D
                     for p in range(0,tmp.shape[0]):
@@ -331,9 +334,13 @@ class HotStart(object):
         for nlev in range(0,arri_time.shape[0]):
             if np.any(arri_time[nlev].to_masked_array()):
                 arr=mask_interp(xx,yy,arri_time[nlev].to_masked_array())
-                if len(arr.z)>6:
+                if len(arr.z)>1:
                     tmp[:,nlev]=arr(np.vstack((self.llon,self.llat)).T, nnear=1, p=2)
 
+        for nlev in range(1,tmp.shape[1]):
+            bad=np.isnan(tmp[:,nlev])
+            if np.any(bad):
+                tmp[bad,nlev]=tmp[bad,nlev-1]
 
         if self.zs.shape[1]==2: # 2D
             for p in range(0,tmp.shape[0]):
@@ -397,6 +404,10 @@ class HotStart(object):
                 if len(arr.z)>6:
                     tmp[:,nlev]=arr(np.vstack((self.llon,self.llat)).T, nnear=1, p=2)
 
+        for nlev in range(1,tmp.shape[1]):
+            bad=np.isnan(tmp[:,nlev])
+            if np.any(bad):
+                tmp[bad,nlev]=tmp[bad,nlev-1]
 
         if self.zs.shape[1]==2: # 2D
             for p in range(0,tmp.shape[0]):
