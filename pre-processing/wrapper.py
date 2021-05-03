@@ -62,6 +62,7 @@ class SCHISM():
         self.hotstart=hotstart
 
         # ----------------------------------------------------- Run paramterss -----------
+
         self.outdir = join(self.rootdir, 'outputs')
         self.logdir = logdir or join(self.rootdir, 'log')
         self.indir = indir or join(self.rootdir, 'in')
@@ -76,6 +77,8 @@ class SCHISM():
 
 
         #----------------------------------------------------------------- Logging ---------
+        if not os.path.isdir(self.logdir):
+            os.makedirs(self.logdir)
         logging.basicConfig(filename=join(self.logdir, 'log_run.txt'),
                             filemode='w',
                             format='%(asctime)s %(levelname)s: %(message)s',
