@@ -30,11 +30,7 @@ from hotstart import HotStart
 
 from waves import Wave
 
-logging.basicConfig(filename=None,
-                    filemode='w',
-                    format='%(asctime)s %(levelname)s: %(message)s',
-                    datefmt='[%Y-%m-%d %H:%M:%S]',
-                    level=10)
+
 
 
 class SCHISM():
@@ -80,8 +76,12 @@ class SCHISM():
 
 
         #----------------------------------------------------------------- Logging ---------
-        self.logger = logging
-        self.logger.level = 20
+        logging.basicConfig(filename=join(self.logdir, 'log_run.txt'),
+                            filemode='w',
+                            format='%(asctime)s %(levelname)s: %(message)s',
+                            datefmt='[%Y-%m-%d %H:%M:%S]',
+                            level=10)
+        self.logger=logging
         self.errorsfname = errors
 
     def _set_environment(self):

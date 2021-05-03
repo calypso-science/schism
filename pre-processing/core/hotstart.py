@@ -20,6 +20,12 @@ import interpvert
 
 INTERNAL_EDGE = 0
 BOUNDARY_EDGE = 1
+def fill_in_gap(tmp):
+    for nlev in range(1,tmp.shape[1]):
+        bad=np.isnan(tmp[:,nlev])
+        if np.any(bad):
+            tmp[bad,nlev]=tmp[bad,nlev-1]
+    return tmp
 
 class HotStart(object):
     def __init__(self,filename,config,hgrid,vgrid,t0,z0=0.001,logger=None):
@@ -56,6 +62,7 @@ class HotStart(object):
         self.logger.info("\tWriting:%s" %filename)
         self.dset,self.nc=create_hotstartNC(filename,ntracer,nnodes,ne,ns,nvrt)
 
+
     def build_edgecenters(self):
         """ Build centers of sides
             Returns
@@ -72,6 +79,7 @@ class HotStart(object):
             z1=self.vgrid.sigma_to_zlayer(edges[edgi,0],self.hgrid.h[edges[edgi,0]]*-1,0.,0.1)
             z2=self.vgrid.sigma_to_zlayer(edges[edgi,1],self.hgrid.h[edges[edgi,1]]*-1,0.,0.1)
             zs[edgi,:]=(np.array(z1)+np.array(z2))/2
+
 
         return xs,ys,zs
 
@@ -241,7 +249,8 @@ class HotStart(object):
             for i,v in enumerate(sorted(var)):
                 # horizontal interpolation
                 tmp=get_tide(self.constidx,self.tfreq,self.HC[v],np.array(Time),np.mean(self.llat))      
-                tmp=vertical_extrapolation(tmp,self.zs,z0=self.z0)                       
+                tmp=vertical_extrapolation(tmp,self.zs,z0=self.z0)   
+                tpm=fill_in_gap(tmp)                   
                 total[i,:,:]=total[i,:,:]+tmp
 
         if self.residual:
@@ -270,10 +279,8 @@ class HotStart(object):
                         arr=mask_interp(xx,yy,arri_time[nlev].to_masked_array())
                         if len(arr.z)>1:
                             tmp[:,nlev]=arr(np.vstack((self.llon,self.llat)).T, nnear=1, p=2)
-                for nlev in range(1,tmp.shape[1]):
-                    bad=np.isnan(tmp[:,nlev])
-                    if np.any(bad):
-                        tmp[bad,nlev]=tmp[bad,nlev-1]
+
+                tpm=fill_in_gap(tmp) 
 
                 if self.zs.shape[1]==2: # 2D
                     for p in range(0,tmp.shape[0]):
@@ -337,10 +344,7 @@ class HotStart(object):
                 if len(arr.z)>1:
                     tmp[:,nlev]=arr(np.vstack((self.llon,self.llat)).T, nnear=1, p=2)
 
-        for nlev in range(1,tmp.shape[1]):
-            bad=np.isnan(tmp[:,nlev])
-            if np.any(bad):
-                tmp[bad,nlev]=tmp[bad,nlev-1]
+        tpm=fill_in_gap(tmp) 
 
         if self.zs.shape[1]==2: # 2D
             for p in range(0,tmp.shape[0]):
@@ -401,13 +405,10 @@ class HotStart(object):
         for nlev in range(0,arri_time.shape[0]):
             if np.any(arri_time[nlev].to_masked_array()):
                 arr=mask_interp(xx,yy,arri_time[nlev].to_masked_array())
-                if len(arr.z)>6:
+                if len(arr.z)>1:
                     tmp[:,nlev]=arr(np.vstack((self.llon,self.llat)).T, nnear=1, p=2)
 
-        for nlev in range(1,tmp.shape[1]):
-            bad=np.isnan(tmp[:,nlev])
-            if np.any(bad):
-                tmp[bad,nlev]=tmp[bad,nlev-1]
+        tpm=fill_in_gap(tmp) 
 
         if self.zs.shape[1]==2: # 2D
             for p in range(0,tmp.shape[0]):

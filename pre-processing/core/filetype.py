@@ -1,7 +1,7 @@
 #!/usr/bin/env python2.7
 from netCDF4 import Dataset
 
-def create_ncTH(filename,Nnode,Nlev,Nvar,T):
+def create_ncTH(filename,Nnode,Nlev,Nvar,T,gd_node):
 	if '_nu.nc' not in filename:
 
 		nc = Dataset(filename, 'w', format='NETCDF4',clobber=True)
@@ -32,7 +32,7 @@ def create_ncTH(filename,Nnode,Nlev,Nvar,T):
 		time_series = nc.createVariable('tracer_concentration', 'f4', ('time','node','nVert','ntracers'))
 		time[:]=T/86400.0
 		imap = nc.createVariable('map_to_global_node','i4',('node'))
-		imap[:]=1
+		imap[:]=gd_node+1
 
 	return time_series,nc
 

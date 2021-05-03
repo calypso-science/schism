@@ -259,40 +259,36 @@ class download_data(object):
 
         for day in days[:-1]:
             self.logger.info( " Sourcing data for %s-%s-%s" %(day.year, day.month, day.day))
-            # if day == days[-2]: 
-            #     # if it's the end of a month, extrapolate to future
-            #     tend = day + datetime.timedelta(seconds=24*3600)
-            # else: # it not, we do  dt not want to extrpolate to future
-            
-            # to avoid UDS getting time record in the future,
-            #     we need to hardwire for a valid last time record
             tend = day + datetime.timedelta(seconds=(24-delta)*3600)
 
+            try:
 
-            filetmp = "%s%s.000000.nc" %(source.get('id'), day.strftime("%Y%m%d"))
-            filetmp=os.path.join(rootdir, "in", filetmp)
+                filetmp = "%s%s.000000.nc" %(source.get('id'), day.strftime("%Y%m%d"))
+                filetmp=os.path.join(rootdir, "in", filetmp)
 
-            if source['id'].lower()=='hycom':
-                self.download_hycom(filetmp,source,day,tend)
-                self.clean_hycom(filetmp)
-            elif source['id'].lower()=='mercator':
-                self.download_mercator(filetmp,source,day,tend)
-                self.clean_mercator(filetmp)
-            elif source['id'].lower()=='ecmwf':
-                self.download_ecmwf(filetmp,source,day,tend)
-                self.clean_ecmwf(filetmp)
-            elif source['id'].lower()=='predictwind':
-                self.download_pw(filetmp,source,day,tend)
-                self.clean_pw(filetmp)                
-            elif source['id'].lower()=='uds':
-                self.download_uds(filetmp,source,day,tend)
-                self.clean_uds(filetmp)
-                if source.get('type','')=='tide':
-                    break
+                if source['id'].lower()=='hycom':
+                    self.download_hycom(filetmp,source,day,tend)
+                    self.clean_hycom(filetmp)
+                elif source['id'].lower()=='mercator':
+                    self.download_mercator(filetmp,source,day,tend)
+                    self.clean_mercator(filetmp)
+                elif source['id'].lower()=='ecmwf':
+                    self.download_ecmwf(filetmp,source,day,tend)
+                    self.clean_ecmwf(filetmp)
+                elif source['id'].lower()=='predictwind':
+                    self.download_pw(filetmp,source,day,tend)
+                    self.clean_pw(filetmp)                
+                elif source['id'].lower()=='uds':
+                    self.download_uds(filetmp,source,day,tend)
+                    self.clean_uds(filetmp)
+                    if source.get('type','')=='tide':
+                        break
 
-            else:
-                self.logger.info('  Source not understood')
+                else:
+                    self.logger.info('  Source not understood')
 
+            except:
+                self.logger.info( " !!!! Not Found: %s-%s-%s !!!!" %(day.year, day.month, day.day))
 
 
         self.concat_files(os.path.join(rootdir, "in"),filename,source.get('id'),source.get('type'))

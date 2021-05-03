@@ -28,7 +28,7 @@ class OpenBoundaries(object):
         self.vgrid=vgrid
         self.t0=t0
         self.t1=t1
-
+        self.gd_nodes_id=None
         self.bnd_nodes=[self.hgrid.mesh.boundaries[None][bnd]['indexes'] for bnd in self.hgrid.mesh.boundaries[None]]
         for x in range(len(self.bnd_nodes)):
             self.bnd_nodes[x]=[int(y)-1 for y in self.bnd_nodes[x]]
@@ -42,7 +42,7 @@ class OpenBoundaries(object):
 
         bnd=obc.get('bnd',None)
         if obc.get('distance',None):
-            self.llat,self.llon,self.zz,self.gd_nodes=self.get_nodes_distances(bnd,obc.get('distance',None))
+            self.llat,self.llon,self.zz,self.gd_nodes_id=self.get_nodes_distances(bnd,obc.get('distance',None))
             self.zz=np.array(self.zz)  
         elif bnd: 
             self.llat,self.llon,self.zz=self.get_all_open_bnd(bnd)
@@ -81,7 +81,7 @@ class OpenBoundaries(object):
             Zlayer_ocean.append(self.vgrid.sigma_to_zlayer(node_i,self.hgrid.h[node_i]*-1,0.,0.1))
 
 
-        return Lat_ocean,Lon_ocean,Zlayer_ocean,gd_node
+        return Lat_ocean,Lon_ocean,Zlayer_ocean,gd_node_id
 
     def get_all_nodes(self):
         Lat_ocean=[]
@@ -111,6 +111,8 @@ class OpenBoundaries(object):
                 Lat_ocean.append(self.hgrid.latitude[node_i])
                 Lon_ocean.append(self.hgrid.longitude[node_i])
                 Zlayer_ocean.append(self.vgrid.sigma_to_zlayer(node_i,self.hgrid.h[node_i]*-1,0.,0.1))
+
+
 
         return Lat_ocean,Lon_ocean,Zlayer_ocean        
 
@@ -161,17 +163,11 @@ class OpenBoundaries(object):
             Nlev=1
 
 
-        if '_nu.nc' in fileout:
-            nnodes=len(self.hgrid.mesh.x)
-        else:
-            nnodes=len(self.llon)
-
-        time_Series,nc=create_ncTH(fileout,nnodes,Nlev,self.ivs,np.round((TimeSeries-TimeSeries[0])*24*3600))
-        
-        # if '_nu.nc' not in fileout:
-        #     nnodes=len(self.hgrid.mesh.x)
-        # else:
         nnodes=len(self.llon)
+
+        time_Series,nc=create_ncTH(fileout,nnodes,Nlev,self.ivs,np.round((TimeSeries-TimeSeries[0])*24*3600),gd_node=self.gd_nodes_id)
+        
+
 
 
         for n in range(0,len(TimeSeries)):
@@ -271,11 +267,11 @@ class OpenBoundaries(object):
 
             if n % 100 == 0:
                 self.logger.info('For timestep=%.f, max=%.4f, min=%.4f , max abs diff=%.4f' % (TimeSeries[n],total.max(),total.min(),abs(np.diff(total,n=1,axis=0)).max()))
-            if '_nu.nc' in fileout:
-                time_Series[n,self.gd_nodes,:,:]=total
-                time_Series[n,~self.gd_nodes,:,:]=-9999
-            else:
-                time_Series[n,:,:,:]=total
+            # if '_nu.nc' in fileout:
+            #     time_Series[n,self.gd_nodes,:,:]=total
+            #     time_Series[n,~self.gd_nodes,:,:]=-9999
+            # else:
+            time_Series[n,:,:,:]=total
         nc.close()
 
     def create_th(self,fileout,TimeSeries,options):
