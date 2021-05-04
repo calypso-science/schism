@@ -38,12 +38,11 @@ def transform_proj(x, y, in_espg=2193, out_espg=4326):
 
 class MakeMeshMask():   
     '''Docstring'''
-    def __init__(self,lim, resolution,filgrid, **kwargs):
+    def __init__(self,lim, resolution,filgrid,hgrid_proj, **kwargs):
         super(MakeMeshMask, self).__init__(**kwargs)
 
-        hgrid_proj = 4326
-        self.mesh = self.load_mesh(filgrid)
-        x, y = self.get_coords(filgrid)
+        self.mesh = self.load_mesh(filgrid,hgrid_proj)
+        x, y = self.get_coords(filgrid,hgrid_proj)
  
         if  hgrid_proj != WGS84:
             self.lon, self.lat = transform_proj(x, y, in_espg=hgrid_proj, out_espg=WGS84)
@@ -53,12 +52,12 @@ class MakeMeshMask():
         self.resolution = resolution
         self.lim= lim
         
-    def load_mesh(self,filgrid):
-        hgrid = Hgrid.open(filgrid,crs="EPSG:%i" % 4326)
+    def load_mesh(self,filgrid,epsg):
+        hgrid = Hgrid.open(filgrid,crs="EPSG:%i" % epsg)
         return hgrid
 
-    def get_coords(self,filgrid):
-        mesh = self.load_mesh(filgrid)
+    def get_coords(self,filgrid,epsg):
+        mesh = self.load_mesh(filgrid,epsg)
 
 
         x = np.array(mesh.x)
@@ -148,7 +147,7 @@ class MakeMeshMask():
         for seg in island_edge:
             island_nodes.append([(self.lon[node],self.lat[node]) for node in seg])
 
-        return Polygon(mesh_nodes, island_nodes) #
+        return Polygon(mesh_nodes,island_nodes ) #
 
     def _inpolygon(self, polygon, xp, yp):
         return np.array([Point(x, y).intersects(polygon) for x, y in zip(xp, yp)],dtype=np.bool)
@@ -514,7 +513,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
         INDend=get_INDend(dirout,prefix)
 
 
-    msk=MakeMeshMask(lim,res,hgrid)
+    msk=MakeMeshMask(lim,res,hgrid,epsg)
     Mask=msk.make_grid_mask()
     mask = Mask.mask.values
     if lim == None:
@@ -531,7 +530,6 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
     ugrid=(X,Y)
     tmp=griddata(ugrid, depth, rgrid, method='linear')
     masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
-
 
     ds=create_dataset(Ts,unit,rloni,rlati,params,masked_vari,lev=levs)
     ds['dep']=ds['dep'][:].fillna(1e20)
@@ -586,7 +584,7 @@ if __name__ == "__main__":
     parser.add_argument('--lim', type=float,help='Xlim,Ylim',nargs='+')
     parser.add_argument('--min_depth', type=float,default=1,help='min_depth')
     parser.add_argument('--prefix', type=str,default='schout_',help='prefix')
-    parser.add_argument('--epsg', type=float,default=2193,help='epsg')
+    parser.add_argument('--epsg', type=int,default=2193,help='epsg')
     
     args = parser.parse_args()
 
