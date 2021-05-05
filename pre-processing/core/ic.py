@@ -115,11 +115,12 @@ class InitialConditions(object):
         lat=self.hgrid.latitude
 
         res=xr.open_dataset(ncfile)
-
+        _, index = np.unique(res['time'], return_index=True)
+        res=res.isel(time=index)
         #time0=[np.datetime64(x) for x in time0]
         arri=res[var][:]
-        import pdb;pdb.set_trace()
-        arri_time=arri.interp(time=self.t0)
+
+        arri_time=arri.interp(time=self.t0.strftime('%Y-%m-%d %H:%M:%S'))
         #geo_idx = (np.abs(date2num(time0)-date2num(self.t0))).argmin() # closest timestep
        
 
