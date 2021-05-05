@@ -114,12 +114,11 @@ class InitialConditions(object):
         lon=self.hgrid.longitude
         lat=self.hgrid.latitude
 
-        
+        res=xr.open_dataset(ncfile)
 
-        time0=netCDF4.num2date(data['time'][:],data['time'].units)
         #time0=[np.datetime64(x) for x in time0]
-        arri=data[var][:]
-        arri_time=arri.interp(time=time0.strftime('%Y-%m-%d %H:%M:%S'))
+        arri=res[var][:]
+        arri_time=arri.interp(time=self.t0.strftime('%Y-%m-%d %H:%M:%S'))
         #geo_idx = (np.abs(date2num(time0)-date2num(self.t0))).argmin() # closest timestep
        
 
