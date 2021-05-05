@@ -118,7 +118,7 @@ class InitialConditions(object):
 
         #time0=[np.datetime64(x) for x in time0]
         arri=res[var][:]
-        arri_time=arri.interp(time=self.t0.strftime('%Y-%m-%d %H:%M:%S'))
+        arri_time=arri.interp(time=self.t0)
         #geo_idx = (np.abs(date2num(time0)-date2num(self.t0))).argmin() # closest timestep
        
 
