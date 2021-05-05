@@ -118,16 +118,17 @@ class InitialConditions(object):
 
         time0=netCDF4.num2date(data['time'][:],data['time'].units)
         #time0=[np.datetime64(x) for x in time0]
-
-        geo_idx = (np.abs(date2num(time0)-date2num(self.t0))).argmin() # closest timestep
+        arri=data[var][:]
+        arri_time=arri.interp(time=time0.strftime('%Y-%m-%d %H:%M:%S'))
+        #geo_idx = (np.abs(date2num(time0)-date2num(self.t0))).argmin() # closest timestep
        
-        varin=data[var][geo_idx]
-        if len(varin.shape)>2:
-            varin=varin[0] # get surface level
 
-        src=mask_interp(xx,yy,varin)
+        if len(arri_time.shape)>2:
+            arri_time=arri_time[0] # get surface level
 
-        tb=src(np.vstack((lon,lat)).T,nnear=6, p=2)
+        src=mask_interp(xx,yy,arri_time.to_masked_array())
+
+        tb=src(np.vstack((lon,lat)).T,nnear=1, p=2)
 
         if np.any(np.isnan(tb)):
             import pdb;pdb.set_trace()
