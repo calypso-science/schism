@@ -127,7 +127,7 @@ class InitialConditions(object):
 
         src=mask_interp(xx,yy,varin)
 
-        tb=src(np.vstack((lon,lat)).T)
+        tb=src(np.vstack((lon,lat)).T,nnear=6, p=2)
 
         if np.any(np.isnan(tb)):
             import pdb;pdb.set_trace()
