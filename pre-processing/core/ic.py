@@ -6,7 +6,7 @@ import numpy.matlib
 from interp2D import mask_interp
 #from vacumm.misc.grid.regridding import fill2d
 #from vcmq import create_time,grid2xy,extend2d
-
+import xarray as xr
 from matplotlib.dates import date2num,num2date
 import fiona
 from matplotlib.path import Path
