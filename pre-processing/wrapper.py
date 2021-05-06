@@ -79,7 +79,7 @@ class SCHISM():
         #----------------------------------------------------------------- Logging ---------
         if not os.path.isdir(self.logdir):
             os.makedirs(self.logdir)
-        logging.basicConfig(filename=join(self.logdir, 'log_run.txt'),
+        logging.basicConfig(filename=None,#join(self.logdir, 'log_run.txt'),
                             filemode='w',
                             format='%(asctime)s %(levelname)s: %(message)s',
                             datefmt='[%Y-%m-%d %H:%M:%S]',
