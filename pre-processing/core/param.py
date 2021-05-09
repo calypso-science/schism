@@ -79,6 +79,10 @@ class ModelConfig(object):
         ''' Docstring'''
         default={}
         if module is 'hydro':
+            default['iloadtide']=0
+            default['itransport_only']=0
+            default['i_hmin_airsea_ex']=2
+            default['hmin_airsea_ex']=0.2
             default['ics']=1
             default['ncor']=0
             default['ibcc']=0
