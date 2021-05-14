@@ -326,7 +326,37 @@ def create_dataset(times,unit,X,Y,Vars,depth,lev=0):
                         'standard_name': 'sea_water_temperature',
                         }
                     )
-
+        
+        if var == 'vert': 
+            dset['vert']=xr.DataArray(
+                    data   = np.random.random((len(times),len(lev),X.shape[0],X.shape[1])),   # enter data here
+                    dims   = ['time','lev','lat','lon'],
+                    coords = {'time': times,
+                             "lev": (['lev'],lev),
+                             "lat": (["lat"], Y[:,0]),
+                             "lon": (["lon"], X[0,:])},  
+                    attrs  = {
+                        '_FillValue': 1e20,
+                        'units'     : 'm.s^{-1}',
+                        'long_name': 'vertical velocity',
+                        'standard_name': 'vertical_velocity',
+                        }
+                    )
+        if var == 'kine': 
+            dset['kine']=xr.DataArray(
+                    data   = np.random.random((len(times),len(lev),X.shape[0],X.shape[1])),   # enter data here
+                    dims   = ['time','lev','lat','lon'],
+                    coords = {'time': times,
+                             "lev": (['lev'],lev),
+                             "lat": (["lat"], Y[:,0]),
+                             "lon": (["lon"], X[0,:])},  
+                    attrs  = {
+                        '_FillValue': 1e20,
+                        'units'     : '',
+                        'long_name': 'turbulent kinetic energy',
+                        'standard_name': 'turbulent_kinetic_energy',
+                        }
+                    )
 
         if var == 'hvel':
             dset['u']=xr.DataArray(
