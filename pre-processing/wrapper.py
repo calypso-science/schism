@@ -79,12 +79,25 @@ class SCHISM():
         #----------------------------------------------------------------- Logging ---------
         if not os.path.isdir(self.logdir):
             os.makedirs(self.logdir)
-        logging.basicConfig(filename=None,#join(self.logdir, 'log_run.txt'),
-                            filemode='w',
-                            format='%(asctime)s %(levelname)s: %(message)s',
-                            datefmt='[%Y-%m-%d %H:%M:%S]',
-                            level=10)
-        self.logger=logging
+
+        self.logger=logging.getLogger('logger')
+        self.logger.setLevel(10)
+        formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
+        fh = logging.FileHandler(join(self.logdir, 'log_build.txt'), mode='w', encoding='utf-8')
+        fh.setLevel(10)
+        fh.setFormatter(formatter)
+        self.logger.addHandler(fh)
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+        ch.setFormatter(formatter)
+        self.logger.addHandler(ch)
+        # logging.basicConfig(filename=None,#join(self.logdir, 'log_run.txt'),
+        #                     filemode='w',
+        #                     format='%(asctime)s %(levelname)s: %(message)s',
+        #                     datefmt='[%Y-%m-%d %H:%M:%S]',
+        #                     level=10)
+        # self.logger=logging
+
         self.errorsfname = errors
 
     def _set_environment(self):
