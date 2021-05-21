@@ -327,8 +327,8 @@ def create_dataset(times,unit,X,Y,Vars,depth,lev=0):
                         }
                     )
         
-        if var == 'vert': 
-            dset['vert']=xr.DataArray(
+        if var == 'vertical_velocity': 
+            dset['vertical_velocity']=xr.DataArray(
                     data   = np.random.random((len(times),len(lev),X.shape[0],X.shape[1])),   # enter data here
                     dims   = ['time','lev','lat','lon'],
                     coords = {'time': times,
@@ -342,8 +342,8 @@ def create_dataset(times,unit,X,Y,Vars,depth,lev=0):
                         'standard_name': 'vertical_velocity',
                         }
                     )
-        if var == 'kine': 
-            dset['kine']=xr.DataArray(
+        if var == 'TKE': 
+            dset['TKE']=xr.DataArray(
                     data   = np.random.random((len(times),len(lev),X.shape[0],X.shape[1])),   # enter data here
                     dims   = ['time','lev','lat','lon'],
                     coords = {'time': times,
