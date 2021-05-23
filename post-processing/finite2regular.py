@@ -645,7 +645,6 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
                         Z[vv][n,i,Z[vv][n,i,:]<=-990]=np.nan
                         interpo.values[:,0]=Z[vv][n,i,:]
                         masked_vari = np.ma.masked_array(interpo(rgrid), mask=mask.reshape(tmp.shape))
-                        import pdb;pdb.set_trace()
                         # if i>2:
                         #     masked_vari[masked_vari<=-990.0]=1e20
                         ds[v][nn,i,:,:]=masked_vari
