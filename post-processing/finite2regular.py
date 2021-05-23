@@ -561,7 +561,7 @@ def get_INDend(dirout,prefix):
 
 
 
-def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,prefix,epsg,log_dir):
+def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,prefix,epsg,log_dir=False):
     if log_dir:
         logger=set_up_logger(log_dir)
     else:
