@@ -234,6 +234,7 @@ def vertical_interpolation(zcor,e,lev):
         ind = np.where(~np.isnan(z2[:,la]))[0]
         z2[ind,la] = z2[ind,la+1]
 
+    import pdb;pdb.set_trace()
     EE=interpz.interpz1d(e2,z2,lev2,np=e2.shape[0],nzin=e2.shape[1],nzout=len(lev2),kz=1, null_value=-9.9e15)
     
     for n in range(0,len(lev2)):
