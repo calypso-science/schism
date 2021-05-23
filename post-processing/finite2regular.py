@@ -241,7 +241,7 @@ def vertical_interpolation(zcor,e,lev):
         E[:,n+1]=EE[:,n]
 
 
-    import pdb;pdb.set_trace()
+    E[E==-99999]=np.nan
     return E
 
 def create_dataset(times,unit,X,Y,Vars,depth,lev=0):
