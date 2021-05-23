@@ -49,7 +49,7 @@ subroutine interpz1d(varin, zin, zout, np, nzin, nzout, kz, null_value, varout)
 
         ! interpolate z
         if (zout(kout) < zin(i,kz)) then ! zout below bathymetry
-          ! do nothing
+          varout(i,kout) =-99999! do nothing
         elseif (zout(kout) >= zin(i,nzin)) then
           !if (debug .and. i==debug_node) write(*,*) 'getting surface!'
           write(*,*) 'getting surface!'
