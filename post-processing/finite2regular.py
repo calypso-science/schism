@@ -229,7 +229,7 @@ def vertical_interpolation(zcor,e,lev):
     surf=np.zeros((zcor.shape[0],1))
     surf[:,0]=z2[:,-1]
     z2=z2-surf
-    Z2[Z2<-90999]=-99999
+    z2[z2<-90999]=-99999
     EE=interpz.interpz1d(e2,z2,lev2,np=e2.shape[0],nzin=e2.shape[1],nzout=len(lev2),kz=1, null_value=-9.9e15)
     
     for n in range(0,len(lev2)):
