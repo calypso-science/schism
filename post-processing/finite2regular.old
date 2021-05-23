@@ -9,7 +9,6 @@ import numpy as np
 import copy
 import pandas as pd
 from scipy.interpolate import griddata
-from scipy.interpolate import LinearNDInterpolator
 from pyschism.mesh import Hgrid
 from pyproj import Proj,transform
 from descartes.patch import PolygonPatch
@@ -507,7 +506,7 @@ def extract_raw(file,params, lim,idx,lev):
                         tmp=vertical_interpolation(zcor,tmp,lev)
                         ds[Param[k]][n,:,:]=tmp.T
 
-    return ds,nt
+    return ds
 
 def read_initial_netcdf_file(file0,file1,epsg,lim,min_depth):
 
@@ -599,8 +598,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
                                           epsg,lim,min_depth)
 
     ugrid=(X,Y)
-    interpo = LinearNDInterpolator(ugrid, depth)
-    tmp=interpo(rgrid)
+    tmp=griddata(ugrid, depth, rgrid, method='linear')
     masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
 
 
@@ -610,44 +608,39 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
     ds=create_dataset(Ts,unit,rloni,rlati,params,masked_vari,lev=levs)
     ds['dep']=ds['dep'][:].fillna(1e20)
 
-    
+
 
     for nfile in range(INDstart,INDend+1):
         fileIN=os.path.join(dirout,prefix+str(nfile)+'.nc')
         if logger:
             logger.info('\tReading file %s' % fileIN )      
-        Z,nt=extract_raw(fileIN,params, lim, gd,lev=levs)
-
-        for n in range(0,nt):
-            nn=n+(nt*(nfile-INDstart))
+        Z=extract_raw(fileIN,params, lim, gd,lev=levs)
+        for vv in Z:
             if logger:
-                logger.info('\t\tDoing timestep %.i' % n )         
+                logger.info('\t\tReading variable %s' % vv ) 
+            if vv in schism_mapping.keys():
+                v=schism_mapping[vv]
 
-            for vv in Z:
+            for n in range(0,Z[vv].shape[0]):
+                nn=n+(Z[vv].shape[0]*(nfile-INDstart))
                 if logger:
-                    logger.info('\t\t\tDoing variable %s' % vv ) 
-                if vv in schism_mapping.keys():
-                    v=schism_mapping[vv]
-                else:
-                    v=copy.deepcopy(vv)
-
-
+                    logger.info('\t\t\tDoing timestep %.i' % n ) 
 
                 if len(Z[vv].shape)==3:
                     for i in range(0,Z[vv].shape[1]):
                         Z[vv][n,i,Z[vv][n,i,:]<=-990]=np.nan
-                        interpo.values[:,0]=Z[vv][n,i,:]
-                        masked_vari = np.ma.masked_array(interpo(rgrid), mask=mask.reshape(tmp.shape))
+                        tmp=griddata(ugrid, Z[vv][n,i,:], rgrid, method='linear')
+                        masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
                         # if i>2:
                         #     masked_vari[masked_vari<=-990.0]=1e20
                         ds[v][nn,i,:,:]=masked_vari
                 else:
-                        interpo.values[:,0]=Z[vv][n,:]
-                        masked_vari = np.ma.masked_array(interpo(rgrid), mask=mask.reshape(tmp.shape))
+                        tmp=griddata(ugrid, Z[vv][n,:], rgrid, method='linear')
+                        masked_vari = np.ma.masked_array(tmp, mask=mask.reshape(tmp.shape))
                         ds[v][nn,:,:]=masked_vari
             
 
-                ds[v]=ds[v][:].fillna(1e20)
+            ds[v]=ds[v][:].fillna(1e20)
 
 
     fileout=fileout.replace('.nc','')+netCDF4.num2date(Ts,unit)[0].strftime('%Y%m%d_%Hz.nc')
