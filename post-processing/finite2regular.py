@@ -507,7 +507,6 @@ def extract_raw(file,params, lim,idx,lev):
                 if ivs==1: # temp
                     tmp=data[idx]
                     tmp=vertical_interpolation(zcor,tmp,lev)
-                    import pdb;pdb.set_trace()
                     ds[Param[0]][n,:,:]=tmp.T
                 else:
                     for k in range(0,2):
