@@ -178,6 +178,7 @@ def plot2D(X,Y,F,Z,params):
     Zmin=Z.min()
     Zmax=Z.max()
     levels = numpy.linspace(Zmin,Zmax, 60)
+    Z[numpy.isnan(Z)]=99999
     F=plt.tricontourf(X,Y,F,Z)#,vmin=Z.min(),vmax=Z.max(),cmap=plt.cm.Spectral_r,levels=levels)
     plt.clim(Zmin,Zmax)
     plt.xlabel('Easting (meters)',fontsize = 30)
