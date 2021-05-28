@@ -116,8 +116,8 @@ class Meteo(object):
     def make_meteo(self):
     ## get time series daily
         dt=self.Tforcing[2]-self.Tforcing[1]
-        unique_days=np.unique(np.floor(self.Tforcing))
-
+        #unique_days=np.unique(np.floor(self.Tforcing))
+        unique_days=np.unique(self.Tforcing)
 
         for section in file_sections:
 
