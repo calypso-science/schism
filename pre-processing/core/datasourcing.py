@@ -59,7 +59,7 @@ class download_data(object):
             url+='&lon='+str(source.get('Grid')['x'])   
             url+='&timestep='+str(source.get('dt'))  
             url+='&source='+source.get('product')   
-            url+='&compress=false&forcast=all&Z=1'
+            url+='&compress=false&forecast=all&Z=10'
             url+='&resolution='+str(source.get('Grid')['dx']) 
             var='all'  
 
