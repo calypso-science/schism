@@ -34,6 +34,7 @@ class download_data(object):
         os.system('mv %s %s' % (filein,filein+'.grb'))
         ds=xr.open_dataset(filein+'.grb', engine="cfgrib")
         ds.to_netcdf(filein)
+        import pdb;pdb.set_trace()
         os.system("ncks -O -C -x -v step %s %s"%(filein, filein))
         os.system("ncks -O -C -x -v time %s %s"%(filein, filein))
         os.system("ncrename -O -v valid_time,time %s %s"%(filein, filein))
