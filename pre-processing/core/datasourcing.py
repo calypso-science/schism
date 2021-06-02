@@ -59,7 +59,8 @@ class download_data(object):
             url+='&timestep='+str(source.get('dt'))  
             url+='&source='+source.get('product')   
             url+='&compress=false&forcast=all'
-            url+='&resolution='+str(source.get('Grid')['dx'])   
+            url+='&resolution='+str(source.get('Grid')['dx']) 
+            var='all'  
 
         else:
             url+='&nlat='+str(source.get('Grid')['y2'])
@@ -89,7 +90,7 @@ class download_data(object):
         url+='"'
         print(url)
         root,filename=os.path.split(fileout)
-        import pdb;pdb.set_trace()
+
         for itry in range(0,10):
             self.logger.info('Try #%i for %s' % (itry,var))
             os.system(url)
