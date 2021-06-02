@@ -34,6 +34,7 @@ class download_data(object):
         os.system('mv %s %s' % (filein,filein+'.grb'))
         ds=xr.open_dataset(filein+'.grb', engine="cfgrib")
         ds.to_netcdf(filein)
+        import pdb;pdb.set_trace()
         os.system("ncks -O -C -x -v step %s %s"%(filein, filein))
         os.system("ncks -O -C -x -v time %s %s"%(filein, filein))
         os.system("ncrename -O -v valid_time,time %s %s"%(filein, filein))
@@ -58,7 +59,7 @@ class download_data(object):
             url+='&lon='+str(source.get('Grid')['x'])   
             url+='&timestep='+str(source.get('dt'))  
             url+='&source='+source.get('product')   
-            url+='&compress=false&forcast=all'
+            url+='&compress=false&forcast=all&Z=10'
             url+='&resolution='+str(source.get('Grid')['dx']) 
             var='all'  
 
