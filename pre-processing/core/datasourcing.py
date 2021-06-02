@@ -47,32 +47,44 @@ class download_data(object):
         #os.system("ncatted -O -a _FillValue,,o,f,9.96920996838687e+36 %s %s" %(filein, filein))
     def download_pw(self,fileout,source,t0,t1):
 
+
         url='wget -O '+fileout+' "'+source.get('url')
 
 
         url+='username='+source.get('user')
         url+='&password='+source.get('pass')
-        url+='&nlat='+str(source.get('Grid')['y2'])
-        url+='&slat='+str(source.get('Grid')['y'])
-        url+='&elon='+str(source.get('Grid')['x2'])
-        url+='&wlon='+str(source.get('Grid')['x'])
-        url+='&time=10'
-        url+='&time='+str(source.get('dt'))
-        nvar=copy.deepcopy(source.get('vars'))
-        url+='&variables='
-        varname=[]
-        if 'u10' in nvar:
-            varname.append('wind')
-        if 'msl' in nvar:
-            varname.append('pressure')
+        if (source.get('Grid')['y2']==source.get('Grid')['y']) & (source.get('Grid')['x2']==source.get('Grid')['x']):
+            url+='&lat='+str(source.get('Grid')['y'])
+            url+='&lon='+str(source.get('Grid')['x'])   
+            url+='&timestep='+str(source.get('dt'))  
+            url+='&source='+source.get('product')   
+            url+='&compress=false&forcast=all'
+            url+='&resolution='+str(source.get('Grid')['dx'])   
 
+        else:
+            url+='&nlat='+str(source.get('Grid')['y2'])
+            url+='&slat='+str(source.get('Grid')['y'])
+            url+='&elon='+str(source.get('Grid')['x2'])
+            url+='&wlon='+str(source.get('Grid')['x'])
+            url+='&time='+str(source.get('dt'))
+            url+='&model='+source.get('product')
+            url+='&res='+str(source.get('Grid')['dx'])
 
-        for var in varname:
-            url+=var+','
+            #url+='&time=10'
+            nvar=copy.deepcopy(source.get('vars'))
+            url+='&variables='
+            varname=[]
+            if 'u10' in nvar:
+                varname.append('wind')
+            if 'msl' in nvar:
+                varname.append('pressure')
 
-        url=url[:-1]
-        url+='&model='+source.get('product')
-        url+='&res='+str(source.get('Grid')['dx'])
+            for var in varname:
+                url+=var+','
+
+            url=url[:-1]
+        
+        
 
         url+='"'
         print(url)
