@@ -32,7 +32,6 @@ class download_data(object):
 
     def clean_pw(self,filein):
         os.system('mv %s %s' % (filein,filein+'.grb'))
-        import pdb;pdb.set_trace()
         ds=xr.open_dataset(filein+'.grb', engine="cfgrib")
         ds.to_netcdf(filein)
         os.system("ncks -O -C -x -v step %s %s"%(filein, filein))
@@ -90,6 +89,7 @@ class download_data(object):
         url+='"'
         print(url)
         root,filename=os.path.split(fileout)
+        import pdb;pdb.set_trace()
         for itry in range(0,10):
             self.logger.info('Try #%i for %s' % (itry,var))
             os.system(url)
