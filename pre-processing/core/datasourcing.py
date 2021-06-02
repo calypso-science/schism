@@ -32,6 +32,7 @@ class download_data(object):
 
     def clean_pw(self,filein):
         os.system('mv %s %s' % (filein,filein+'.grb'))
+        import pdb;pdb.set_trace()
         ds=xr.open_dataset(filein+'.grb', engine="cfgrib")
         ds.to_netcdf(filein)
         os.system("ncks -O -C -x -v step %s %s"%(filein, filein))
