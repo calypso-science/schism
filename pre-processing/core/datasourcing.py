@@ -55,6 +55,23 @@ class download_data(object):
         os.system("rm %s" %(filein+'.grb*'))
 
         #os.system("ncatted -O -a _FillValue,,o,f,9.96920996838687e+36 %s %s" %(filein, filein))
+    
+    def download_olympics(self,fieout,source,t0,t1):
+        url='wget -O '+fileout+' "'+source.get('url')
+
+        url+='username='+source.get('user')
+        url+='&password='+source.get('pass')
+
+        
+        root,filename=os.path.split(fileout)
+
+        for itry in range(0,10):
+            self.logger.info('Try #%i for %s' % (itry,'olympics'))
+            os.system(url)
+            if os.path.isfile(os.path.join(root,filename)):
+                break
+
+
     def download_pw(self,fileout,source,t0,t1):
 
 
@@ -63,6 +80,10 @@ class download_data(object):
 
         url+='username='+source.get('user')
         url+='&password='+source.get('pass')
+
+
+
+
         if (source.get('Grid')['y2']==source.get('Grid')['y']) & (source.get('Grid')['x2']==source.get('Grid')['x']):
             url+='&lat='+str(source.get('Grid')['y'])
             url+='&lon='+str(source.get('Grid')['x'])   
@@ -301,7 +322,10 @@ class download_data(object):
                     self.clean_ecmwf(filetmp)
                 elif source['id'].lower()=='predictwind':
                     self.download_pw(filetmp,source,day,tend)
-                    self.clean_pw(filetmp)                
+                    self.clean_pw(filetmp) 
+                elif source['id'].lower()=='olympics':
+                    self.download_olympics(filetmp,source,day,tend)
+                    self.clean_pw(filetmp)               
                 elif source['id'].lower()=='uds':
                     self.download_uds(filetmp,source,day,tend)
                     self.clean_uds(filetmp)
