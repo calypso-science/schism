@@ -34,6 +34,7 @@ class download_data(object):
         os.system('mv %s %s' % (filein,filein+'.grb'))
         try:
             ds=xr.open_dataset(filein+'.grb', engine="cfgrib")
+            ds.to_netcdf(filein)
         except:
             for v in ['10u','10v','msl']:
                 ds=xr.open_dataset(filein+'.grb', engine="cfgrib",backend_kwargs={'filter_by_keys':{'shortName': '%s' % v}})
