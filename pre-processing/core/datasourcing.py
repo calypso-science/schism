@@ -330,6 +330,7 @@ class download_data(object):
                     self.clean_pw(filetmp) 
                 elif source['id'].lower()=='olympics':
                     self.download_olympics(filetmp,source,day,tend)
+                    self.unzip(filetmp)
                     self.clean_pw(filetmp)               
                 elif source['id'].lower()=='uds':
                     self.download_uds(filetmp,source,day,tend)
