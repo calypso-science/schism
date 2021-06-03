@@ -36,7 +36,7 @@ class download_data(object):
     def clean_pw(self,filein):
 
         os.system('mv %s %s' % (filein,filein+'.grb'))
-        import pdb;pdb.set_trace()
+
         try:
             ds=xr.open_dataset(filein+'.grb', engine="cfgrib")
             ds.to_netcdf(filein)
@@ -248,7 +248,7 @@ class download_data(object):
 
         if filetype=='tide':
             os.system("mv %s %s" % (filelist[0],mergefile))
-        elif fileid=='predictwind':
+        elif fileid=='predictwind' or fileid=='olympics':
             os.system("mv %s %s" % (filelist[0],mergefile))
         else:
             os.system("ncrcat --fl_fmt=classic %s %s" %(file_tmp, mergefile))
