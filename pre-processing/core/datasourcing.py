@@ -31,6 +31,7 @@ class download_data(object):
         self.t1=t1
 
     def clean_pw(self,filein):
+        import pdb;pdb.set_trace()
         os.system('mv %s %s' % (filein,filein+'.grb'))
         try:
             ds=xr.open_dataset(filein+'.grb', engine="cfgrib")
@@ -65,7 +66,7 @@ class download_data(object):
         url+='"'
         
         root,filename=os.path.split(fileout)
-        import pdb;pdb.set_trace()
+
         for itry in range(0,10):
             self.logger.info('Try #%i for %s' % (itry,'olympics'))
             os.system(url)
