@@ -60,7 +60,7 @@ class download_data(object):
 
         url='wget -O '+fileout+' "'+source.get('url')
 
-        url+='username='+source.get('user')
+        url+='&username='+source.get('user')
         url+='&password='+source.get('pass')
 
         
