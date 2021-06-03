@@ -32,6 +32,7 @@ class download_data(object):
 
     def clean_pw(self,filein):
         os.system('mv %s %s' % (filein,filein+'.grb'))
+        import pdb;pdb.set_trace()
         for v in ['10u','10v','msl']:
             ds=xr.open_dataset(filein+'.grb', engine="cfgrib",filter_by_keys={'shortName': '%s' % v})
             ds.to_netcdf(os.path.join(os.path.split(filein)[0],'tmp_%s.nc' % v))
