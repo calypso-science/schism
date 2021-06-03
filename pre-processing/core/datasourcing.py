@@ -32,7 +32,7 @@ class download_data(object):
 
     def unzip(self,filein):
         os.system('mv %s %s' % (filein,filein+'.bz2'))
-        os.system('bzip2 -d %s' % filein)
+        os.system('bzip2 -d %s' % filein+'.bz2')
     def clean_pw(self,filein):
 
         os.system('mv %s %s' % (filein,filein+'.grb'))
