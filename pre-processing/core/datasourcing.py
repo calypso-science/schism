@@ -30,8 +30,11 @@ class download_data(object):
         self.t0=t0
         self.t1=t1
 
+    def unzip(self,filein):
+        os.system('mv %s %s' % (filein,filein+'.bz2'))
+        os.system('bzip2 -d %s' % filein)
     def clean_pw(self,filein):
-        import pdb;pdb.set_trace()
+
         os.system('mv %s %s' % (filein,filein+'.grb'))
         try:
             ds=xr.open_dataset(filein+'.grb', engine="cfgrib")
