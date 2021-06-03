@@ -37,9 +37,9 @@ class download_data(object):
             ds.to_netcdf(os.path.join(os.path.split(filein)[0],'tmp_%s.nc' % v))
 
         
-        os.system("mv %s %s" % (os.path.join(os.path.split(filein)[0],'msl.nc'),filein))
-        os.system('ncks -A -v u10 tmp_10u.nc %s' % filein)
-        os.system('ncks -A -v v10 tmp_10v.nc %s' % filein)
+        os.system("mv %s %s" % (os.path.join(os.path.split(filein)[0],'tmp_msl.nc'),filein))
+        os.system('ncks -A -v u10 %s %s' % (os.path.join(os.path.split(filein)[0],'tmp_%s.nc' % '10u'),filein))
+        os.system('ncks -A -v v10 %s %s' % (os.path.join(os.path.split(filein)[0],'tmp_%s.nc' % '10v'),filein))
         os.system('rm %s' % os.path.join(os.path.split(filein)[0],'tmp_*.nc'))
 
         os.system("ncks -O -C -x -v step %s %s"%(filein, filein))
