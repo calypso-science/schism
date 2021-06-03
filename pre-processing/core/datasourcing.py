@@ -37,7 +37,7 @@ class download_data(object):
             ds=xr.open_dataset(filein+'.grb', engine="cfgrib",backend_kwargs={'filter_by_keys':{'shortName': '%s' % v}})
             ds.to_netcdf(os.path.join(os.path.split(filein)[0],'tmp_%s.nc' % v))
 
-        import pdb;pdb.set_trace()
+
         os.system("mv %s %s" % (os.path.join(os.path.split(filein)[0],'tmp_msl.nc'),filein))
         os.system('ncks -A -v u10 %s %s' % (os.path.join(os.path.split(filein)[0],'tmp_%s.nc' % '10u'),filein))
         os.system('ncks -A -v v10 %s %s' % (os.path.join(os.path.split(filein)[0],'tmp_%s.nc' % '10v'),filein))
