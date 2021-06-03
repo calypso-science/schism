@@ -661,6 +661,7 @@ def process(fileout,hgrid,dirout,INDstart,INDend,params,res,levs,min_depth,lim,p
     if logger:
         logger.info('\tSaving file %s '%  fileout)
     ds.to_netcdf(fileout)
+    return fileout
 
 if __name__ == "__main__":
     
