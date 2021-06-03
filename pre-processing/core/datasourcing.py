@@ -62,7 +62,7 @@ class download_data(object):
 
         url+='&username='+source.get('user')
         url+='&password='+source.get('pass')
-
+        url+='"'
         print(url)
         root,filename=os.path.split(fileout)
 
