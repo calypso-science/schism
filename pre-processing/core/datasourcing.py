@@ -57,6 +57,7 @@ class download_data(object):
         #os.system("ncatted -O -a _FillValue,,o,f,9.96920996838687e+36 %s %s" %(filein, filein))
     
     def download_olympics(self,fieout,source,t0,t1):
+        import pdb;pdb.set_trace()
         url='wget -O '+fileout+' "'+source.get('url')
 
         url+='username='+source.get('user')
