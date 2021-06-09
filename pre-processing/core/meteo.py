@@ -26,12 +26,13 @@ def create_netcdf_file(filename,lon,lat,T,file_sections):
         root_grp.createDimension('ny_grid', lon.shape[0])
         # variables
         times = root_grp.createVariable('time', 'f8', ('time',))
-        base_date=np.double(num2date(T[0]).year),np.double(num2date(T[0]).month),np.double(num2date(T[0]).day),np.double(num2date(T[0]).hour),np.double(num2date(T[0]).minute),np.double(num2date(T[0]).second)
+        roundded_day=np.floor(T[0])
+        base_date=np.double(num2date(roundded_day).year),np.double(num2date(roundded_day).month),np.double(num2date(roundded_day).day),np.double(0),np.double(0),np.double(0)
         times.base_date=base_date
         latitudes = root_grp.createVariable('lat', 'f4', ('ny_grid','nx_grid',))
         longitudes = root_grp.createVariable('lon', 'f4', ('ny_grid','nx_grid',))
         ## add the main var
-        times[:]=np.ceil(abs(T-T[0])*1000)/1000
+        times[:]=np.ceil(abs(T-roundded_day)*1000)/1000
         latitudes[:,:]=lat
         longitudes[:,:]=lon
         ## save the rest
