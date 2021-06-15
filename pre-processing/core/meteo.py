@@ -131,8 +131,7 @@ class Meteo(object):
 
                
                 for n,dataset in enumerate(self.dataset):
-
-                    if ~np.all(np.isnan(dataset['uwind'].interp(time=tin[-1]))):
+                    if  n==0 or ~np.all(np.isnan(dataset['uwind'].interp(time=tin[-1]))):
                    
                         netcdf_name=('sflux_%s_%.f.%04.f.nc' % (section,n+1,k+1))
                        
