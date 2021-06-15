@@ -31,7 +31,8 @@ class download_data(object):
         self.t1=t1
 
     def unzip(self,filein):
-        os.system('mv %s %s' % (filein,filein+'.bz2'))
+        if filein[:-3]!='bz2':
+            os.system('mv %s %s' % (filein,filein+'.bz2'))
         os.system('bzip2 -d %s' % filein+'.bz2')
     def clean_pw(self,filein):
 
@@ -48,6 +49,7 @@ class download_data(object):
             os.system('ncks -A -v u10 %s %s' % (os.path.join(os.path.split(filein)[0],'tmp_%s.nc' % '10u'),filein))
             os.system('ncks -A -v v10 %s %s' % (os.path.join(os.path.split(filein)[0],'tmp_%s.nc' % '10v'),filein))
             os.system('rm %s' % os.path.join(os.path.split(filein)[0],'tmp_*.nc'))
+
 
         os.system("ncks -O -C -x -v step %s %s"%(filein, filein))
         os.system("ncks -O -C -x -v time %s %s"%(filein, filein))
@@ -75,6 +77,13 @@ class download_data(object):
             self.logger.info('Try #%i for %s' % (itry,'olympics'))
             os.system(url)
             if os.path.isfile(os.path.join(root,filename)):
+                break
+    def check_download_olympics(self,fileout):
+        for itry in range(0,10):
+            self.logger.info('Try #%i for %s' % (itry,'AWS file'))
+            if not os.path.isfile(fileout):
+                self.logger.info('Could not find the AWS file:%s' % fileout)
+            else:
                 break
 
 
@@ -248,7 +257,7 @@ class download_data(object):
 
         if filetype=='tide':
             os.system("mv %s %s" % (filelist[0],mergefile))
-        elif fileid=='predictwind' or fileid=='olympics':
+        elif fileid=='predictwind' or fileid=='olympics' or fileid=='aws_bucket':
             os.system("mv %s %s" % (filelist[0],mergefile))
         else:
             os.system("ncrcat --fl_fmt=classic %s %s" %(file_tmp, mergefile))
@@ -332,7 +341,14 @@ class download_data(object):
                 elif source['id'].lower()=='olympics':
                     self.download_olympics(filetmp,source,day,tend)
                     self.unzip(filetmp)
-                    self.clean_pw(filetmp)               
+                    self.clean_pw(filetmp)    
+                elif source['id'].lower()=='aws_bucket':
+                    file0=os.path.join(rootdir,'aws_bucket.bz2')
+                    #filetmp=os.path.join(rootdir,'in','aws_bucket.bz2')
+                    self.check_download_olympics(file0)
+                    os.system('mv %s %s' % (file0,filetmp))
+                    self.unzip(filetmp)
+                    self.clean_pw(filetmp)                              
                 elif source['id'].lower()=='uds':
                     self.download_uds(filetmp,source,day,tend)
                     self.clean_uds(filetmp)
