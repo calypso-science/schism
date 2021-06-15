@@ -257,7 +257,7 @@ class download_data(object):
 
         if filetype=='tide':
             os.system("mv %s %s" % (filelist[0],mergefile))
-        elif fileid=='predictwind' or fileid=='olympics' or fileid=='aws_bucket':
+        elif fileid=='predictwind' or fileid=='olympics' or fileid[:3]=='aws':
             os.system("mv %s %s" % (filelist[0],mergefile))
         else:
             os.system("ncrcat --fl_fmt=classic %s %s" %(file_tmp, mergefile))
@@ -342,8 +342,11 @@ class download_data(object):
                     self.download_olympics(filetmp,source,day,tend)
                     self.unzip(filetmp)
                     self.clean_pw(filetmp)    
-                elif source['id'].lower()=='aws_bucket':
-                    file0=os.path.join(rootdir,'aws_bucket.bz2')
+                elif source['id'].lower()[:3]=='aws':
+                    if '8km' in source['id'].lower():
+                        file0=os.path.join(rootdir,'aws_bucket8km.bz2')
+                    else:
+                        file0=os.path.join(rootdir,'aws_bucket1km.bz2')
                     #filetmp=os.path.join(rootdir,'in','aws_bucket.bz2')
                     self.check_download_olympics(file0)
                     os.system('mv %s %s' % (file0,filetmp))
