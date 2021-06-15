@@ -131,34 +131,35 @@ class Meteo(object):
 
                
                 for n,dataset in enumerate(self.dataset):
+
+                    if ~np.all(np.isnan(dataset['uwind'].interp(time=tin[-1]))):
                    
-                    netcdf_name=('sflux_%s_%.f.%04.f.nc' % (section,n+1,k+1))
-                   
+                        netcdf_name=('sflux_%s_%.f.%04.f.nc' % (section,n+1,k+1))
+                       
+                        temp,root_grp=create_netcdf_file(os.path.join(self.input_dir,netcdf_name),self.lon[n],self.lat[n],t+1,file_sections[section])
+                       
+                        for var in file_sections[section]:
+                            if hasattr(dataset[var],'interp'):
+                                tmp=dataset[var].interp(time=tin)
+                                if self.rh2m and var is 'prmsl':
+                                  prmsl=tmp
+                                if self.rh2m and var is 'stmp':
+                               	  stmp=tmp
+                                if self.rh2m and var is 'spfh':
+                                  tmp=rh2sh(tmp/100.,prmsl,stmp)
+                                
+                                if self.need_sorting:
+                                    tmp=tmp[:,::-1,:]
 
-                    temp,root_grp=create_netcdf_file(os.path.join(self.input_dir,netcdf_name),self.lon[n],self.lat[n],t+1,file_sections[section])
-                   
-                    for var in file_sections[section]:
-                        if hasattr(dataset[var],'interp'):
-                            tmp=dataset[var].interp(time=tin)
-                            if self.rh2m and var is 'prmsl':
-                              prmsl=tmp
-                            if self.rh2m and var is 'stmp':
-                           	  stmp=tmp
-                            if self.rh2m and var is 'spfh':
-                              tmp=rh2sh(tmp/100.,prmsl,stmp)
-                            
-                            if self.need_sorting:
-                                tmp=tmp[:,::-1,:]
-
-                            for nn in range(0,tmp.shape[0]):
-                                temp[var][nn,:,:]=tmp[nn,:,:]
-                        else:
-                            temp[var][nn,:,:]=dataset[var]
+                                for nn in range(0,tmp.shape[0]):
+                                    temp[var][nn,:,:]=tmp[nn,:,:]
+                            else:
+                                temp[var][nn,:,:]=dataset[var]
 
 
-                    root_grp.close()
-                    str='ncks -O --fl_fmt=classic %s %s' %(os.path.join(self.input_dir,netcdf_name),os.path.join(self.input_dir,netcdf_name))
-                    os.system(str)
+                        root_grp.close()
+                        str='ncks -O --fl_fmt=classic %s %s' %(os.path.join(self.input_dir,netcdf_name),os.path.join(self.input_dir,netcdf_name))
+                        os.system(str)
                 
 
 
