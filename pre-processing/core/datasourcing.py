@@ -1,4 +1,4 @@
-import os
+import os,sys
 import datetime
 import get_opendap
 import glob
@@ -83,6 +83,7 @@ class download_data(object):
             self.logger.info('Try #%i for %s' % (itry,'AWS file'))
             if not os.path.isfile(fileout):
                 self.logger.info('Could not find the AWS file:%s' % fileout)
+                sys.exit(-1)
             else:
                 break
 
