@@ -348,6 +348,8 @@ class download_data(object):
                         file0=os.path.join(rootdir,'aws_bucket8km.bz2')
                     else:
                         file0=os.path.join(rootdir,'aws_bucket1km.bz2')
+
+                    self.logger.info('Reading %s for id=%s' % (file0,source['id'].lower()))
                     #filetmp=os.path.join(rootdir,'in','aws_bucket.bz2')
                     self.check_download_olympics(file0)
                     os.system('mv %s %s' % (file0,filetmp))
