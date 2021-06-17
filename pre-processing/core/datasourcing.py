@@ -312,9 +312,10 @@ class download_data(object):
         delta = source.get('dt')
         days = daterange(self.t0, self.t1+ datetime.timedelta(seconds=delta*3600))
 
-        if self.t1>datetime.datetime.now() and source['id'].lower()=='predictwind':
-            self.logger.info('  FORECAST')
-            days = daterange(self.t0, self.t0+ datetime.timedelta(days=1))
+        if self.t1>datetime.datetime.now()
+            if source['id'].lower()=='predictwind' or  source['id'].lower()=='olympics' or source['id'].lower()[:3]=='aws':
+                self.logger.info('  FORECAST')
+                days = daterange(self.t0, self.t0+ datetime.timedelta(days=1))
 
         date_str=[]
 
