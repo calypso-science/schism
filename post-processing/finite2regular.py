@@ -216,8 +216,10 @@ def vertical_interpolation(zcor,e,lev):
     if lev[0]==0.:
         E[:,0]=e[:,-1]
         lev2=lev[1:]
+        add=1
     else:
         lev2=lev
+        add=0
     
     e2=e.data
     e2[e.data==e.fill_value]=0
@@ -238,7 +240,8 @@ def vertical_interpolation(zcor,e,lev):
     EE=interpz.interpz1d(e2,z2,lev2,np=e2.shape[0],nzin=e2.shape[1],nzout=len(lev2),kz=1, null_value=-9.9e15)
     
     for n in range(0,len(lev2)):
-        E[:,n+1]=EE[:,n]
+        E[:,n+add]=EE[:,n]
+
 
 
     E[E==-99999]=np.nan
