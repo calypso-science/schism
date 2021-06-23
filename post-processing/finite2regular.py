@@ -211,36 +211,47 @@ class MakeMeshMask():
 
         return ds
 def vertical_interpolation(zcor,e,lev):
+
     E=np.zeros((e.shape[0],len(lev)))
 
-    if lev[0]==0.:
-        E[:,0]=e[:,-1]
-        lev2=lev[1:]
-        add=1
+    if e.shape[1]==2 : # 2D mode do log 
+        z0=0.1
+        hh=np.abs(zcor[:,0])
+        for n in range(0,len(lev)):
+            z=hh-np.abs(lev[n])
+            z[z==0]=0.0001
+            fac=(np.log(z/z0)/(np.log(hh/z0)-1))
+            E[:,n]=e[:,1]*fac
+
     else:
-        lev2=lev
-        add=0
-    
-    e2=e.data
-    e2[e.data==e.fill_value]=0
-    z2=zcor.data
+        if lev[0]==0.:
+            E[:,0]=e[:,-1]
+            lev2=lev[1:]
+            add=1
+        else:
+            lev2=lev
+            add=0
+        
+        e2=e.data
+        e2[e.data==e.fill_value]=0
+        z2=zcor.data
 
 
-    z2[z2>1e36]=-99999
-    z2[np.isnan(z2)]=-99999
-    surf=np.zeros((zcor.shape[0],1))
-    surf[:,0]=z2[:,-1]
-    z2=z2-surf
-    z2[z2<-90999]=np.nan
-    for la in range(z2.shape[1]-2,-1,-1):
-        ind = np.where(np.isnan(z2[:,la]))[0]
-        z2[ind,la] = z2[ind,la+1]
+        z2[z2>1e36]=-99999
+        z2[np.isnan(z2)]=-99999
+        surf=np.zeros((zcor.shape[0],1))
+        surf[:,0]=z2[:,-1]
+        z2=z2-surf
+        z2[z2<-90999]=np.nan
+        for la in range(z2.shape[1]-2,-1,-1):
+            ind = np.where(np.isnan(z2[:,la]))[0]
+            z2[ind,la] = z2[ind,la+1]
 
 
-    EE=interpz.interpz1d(e2,z2,lev2,np=e2.shape[0],nzin=e2.shape[1],nzout=len(lev2),kz=1, null_value=-9.9e15)
-    
-    for n in range(0,len(lev2)):
-        E[:,n+add]=EE[:,n]
+        EE=interpz.interpz1d(e2,z2,lev2,np=e2.shape[0],nzin=e2.shape[1],nzout=len(lev2),kz=1, null_value=-9.9e15)
+        
+        for n in range(0,len(lev2)):
+            E[:,n+add]=EE[:,n]
 
 
 
